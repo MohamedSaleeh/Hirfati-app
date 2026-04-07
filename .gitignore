@@ -1,0 +1,123 @@
+# ============================================
+#  الجزء 1: الملفات والمجلدات العامة والمشتركة
+# ============================================
+# هذه الملفات تُنشأ بواسطة نظام التشغيل أو أدوات التطوير العامة
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# ============================================
+#  الجزء 2: بيئات التطوير المتكاملة (IDEs)
+# ============================================
+# ملفات IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# ملفات VS Code (تم تفعيلها لأنها خاصة بكل مطور)
+.vscode/
+
+# ============================================
+#  الجزء 3: ملفات Flutter / Dart الأساسية
+# ============================================
+# تتولد تلقائياً عند تشغيل pub get أو flutter run
+.dart_tool/
+.pub-cache/
+.pub/
+/build/
+.flutter-plugins-dependencies
+.packages
+
+# ملف التوثيق المتولد (يمكن إعادة توليده)
+**/doc/api/
+
+# ============================================
+#  الجزء 4: الملفات الخاصة بالمنصات (Platforms)
+# ============================================
+# --- منصة Android ---
+**/android/**/gradle-wrapper.jar
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/.cxx/  # مهم لتجاهل ملفات الـ C++ المؤقتة
+
+# --- منصة iOS ---
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/*sync/
+**/ios/**/.sconsign.dblite
+**/ios/**/.tags*
+**/ios/**/.vagrant/
+**/ios/**/DerivedData/
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/profile
+**/ios/**/xcuserdata
+**/ios/.generated/
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# --- منصة macOS ---
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+
+# --- منصة Windows ---
+**/windows/flutter/generated_plugins.cmake
+**/windows/flutter/generated_plugin_registrant.cc
+
+# --- منصة Linux ---
+**/linux/flutter/generated_plugins.cmake
+**/linux/flutter/generated_plugin_registrant.cc
+
+# ============================================
+#  الجزء 5: الملفات السرية والبيئية (MUST IGNORE!)
+# ============================================
+# الملفات البيئية (.env) بأي شكل من الأشكال
+.env
+.env.*
+*.env
+
+# ملف الخدمة لحساب Firebase (يمنع منعاً باتاً رفعه!)
+firebase-service-account.json
+
+# أي ملف آخر يحتوي على مفاتيح أو شهادات
+*.pem
+*.key
+*.keystore
+*.jks
+key.properties
+
+# ============================================
+#  الجزء 6: ملفات Supabase الخاصة
+# ============================================
+# تجاهل الملفات البيئية والمجلدات المؤقتة فقط، مع الاحتفاظ بـ migrations/
+/supabase/.env*
+/supabase/.temp/
+/supabase/seed-data/
+
+# ============================================
+#  الجزء 7: استثناءات خاصة للمشروع
+# ============================================
+# لا تقم أبداً بتجاهل هذه الملفات المهمة
+!pubspec.yaml
+!analysis_options.yaml

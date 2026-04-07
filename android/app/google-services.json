@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "690547871211",
+    "project_id": "hirfati-2d75f",
+    "storage_bucket": "hirfati-2d75f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690547871211:android:c821ade02f5bcb08a7ddae",
+        "android_client_info": {
+          "package_name": "com.example.hirfati"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnO6MSOvLDNM_dNzuQ707fDn36tHRrCAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

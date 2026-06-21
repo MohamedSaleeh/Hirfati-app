@@ -40,11 +40,7 @@ import 'features/help_support/presentation/screens/help_support_screen.dart';
 import 'features/notification_settings/presentation/screens/notification_settings_screen.dart';
 import 'features/notifications/presentation/screens/notifications_screen.dart';
 import 'features/payment/presentation/screens/payment_success_screen.dart';
-import 'features/payment/presentation/screens/shamcash_payment_screen.dart';
-import 'features/pin/presentation/screens/set_pin_screen.dart';
-import 'features/pin/presentation/screens/verify_pin_screen.dart';
 import 'features/review/presentation/screens/review_screen.dart';
-import 'features/sham_cash/presentation/screens/sham_cash_details_screen.dart';
 import 'translations.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -377,21 +373,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return ReviewScreen(order: order);
         },
       ),
-      GoRoute(
-        path: '/shamcash-payment',
-        name: 'shamcash-payment',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
 
-          return ShamCashPaymentScreen(
-            orderId: extra?['orderId'] ?? '',
-            amount: extra?['amount'] ?? 0.0,
-            workerName: extra?['workerName'] ?? '',
-            serviceTitle: extra?['serviceTitle'] ?? '',
-            onSuccess: () {},
-          );
-        },
-      ),
       GoRoute(
         path: '/payment-success',
         name: 'payment-success',
@@ -409,23 +391,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-      GoRoute(
-        path: '/set-pin',
-        name: 'set-pin',
-        builder: (context, state) => const SetPinScreen(),
-      ),
-      GoRoute(
-        path: '/verify-pin',
-        name: 'verify-pin',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return VerifyPinScreen(
-            title: extra?['title'] ?? 'Verify PIN'.i18n,
-            subtitle: extra?['subtitle'] ?? 'Enter your PIN to continue'.i18n,
-            onVerified: extra?['onVerified'] ?? (_) {},
-          );
-        },
-      ),
+
+
       GoRoute(
         path: '/client/workers/:workerId',
         builder: (context, state) {
@@ -433,11 +400,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           return WorkerProfileDetailsScreen(workerId: workerId);
         },
       ),
-      GoRoute(
-        path: '/sham-cash-details',
-        name: 'sham-cash-details',
-        builder: (context, state) => const ShamCashDetailsScreen(),
-      ),
+
 
       GoRoute(
         path: '/forgot-password',

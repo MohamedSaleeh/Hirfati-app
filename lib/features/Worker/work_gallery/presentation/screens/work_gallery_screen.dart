@@ -134,7 +134,7 @@ class _WorkGalleryScreenState extends ConsumerState<WorkGalleryScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'no_work_items'.i18n.replaceAll('_', ' '),
+                          'no_work_items'.i18n,
                           style: TextStyle(color: Colors.grey.shade600),
                         ),
                         const SizedBox(height: 8),
@@ -148,9 +148,7 @@ class _WorkGalleryScreenState extends ConsumerState<WorkGalleryScreen> {
                             }
                           },
                           icon: const Icon(Icons.add),
-                          label: Text(
-                            'add_first_work'.i18n.replaceAll('_', ' '),
-                          ),
+                          label: Text('add_first_work'.i18n),
                         ),
                       ],
                     ),
@@ -228,8 +226,8 @@ class _WorkGalleryScreenState extends ConsumerState<WorkGalleryScreen> {
     return await showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('delete_work'.i18n.replaceAll('_', ' ')),
-            content: Text('delete_work_confirmation'.i18n.replaceAll('_', ' ')),
+            title: Text('delete_work'.i18n),
+            content: Text('delete_work_confirmation'.i18n),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),

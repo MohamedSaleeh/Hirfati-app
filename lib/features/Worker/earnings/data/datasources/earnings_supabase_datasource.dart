@@ -91,57 +91,9 @@ class EarningsSupabaseDatasource {
     }
   }
 
-  // ✅ دالة جديدة: السحب إلى حساب شام كاش
-  Future<void> withdrawToShamCash({
-    required String userId,
-    required double amount,
-  }) async {
-    print('🏧 withdrawToShamCash called for userId: $userId, amount: $amount');
 
-    try {
-      // ✅ استخدام RPC لضمان الذرية وتجاوز RLS
-      final response = await _client.rpc(
-        'withdraw_to_sham_cash',
-        params: {'p_user_id': userId, 'p_amount': amount},
-      );
 
-      print('✅ RPC response: $response');
 
-      // التحقق من النجاح
-      final isSuccess = response['success'] as bool? ?? false;
-      if (!isSuccess) {
-        throw Exception(response['error'] as String? ?? 'Withdrawal failed');
-      }
-
-      final newWalletBalance =
-          (response['new_wallet_balance'] as num?)?.toDouble() ?? 0;
-      final newShamCashBalance =
-          (response['new_sham_cash_balance'] as num?)?.toDouble() ?? 0;
-
-      print('✅ Withdrawal completed successfully');
-      print('   New wallet balance: $newWalletBalance');
-      print('   New Sham Cash balance: $newShamCashBalance');
-    } catch (e) {
-      print('❌ Error in withdrawToShamCash: $e');
-      rethrow;
-    }
-  }
-
-  // ✅ دالة للحصول على رصيد شام كاش
-  Future<double> getShamCashBalance(String userId) async {
-    try {
-      final response = await _client
-          .from('sham_cash_accounts')
-          .select('balance')
-          .eq('user_id', userId)
-          .maybeSingle();
-
-      return (response?['balance'] as num?)?.toDouble() ?? 0;
-    } catch (e) {
-      print('❌ Error getting Sham Cash balance: $e');
-      return 0;
-    }
-  }
 
   Future<double> _calculateTotalEarnings(String workerId) async {
     print('📊 _calculateTotalEarnings for workerId: $workerId');

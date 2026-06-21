@@ -17,7 +17,7 @@ class WithdrawalHistoryScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerHighest,
       appBar: AppBar(
-        title: Text('withdrawal_history'.i18n.replaceAll('_', ' ')),
+        title: Text('withdrawal_history'.i18n),
         centerTitle: true,
         backgroundColor: colorScheme.surface,
         elevation: 0,
@@ -49,12 +49,12 @@ class WithdrawalHistoryScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'no_withdrawals'.i18n.replaceAll('_', ' '),
+                    'no_withdrawals'.i18n,
                     style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'withdrawals_will_appear_here'.i18n.replaceAll('_', ' '),
+                    'withdrawals_will_appear_here'.i18n,
                     style: TextStyle(
                       fontSize: 12,
                       color: colorScheme.onSurfaceVariant,
@@ -88,7 +88,7 @@ class WithdrawalHistoryScreen extends ConsumerWidget {
             children: [
               Icon(Icons.error_outline, size: 48, color: colorScheme.error),
               const SizedBox(height: 16),
-              Text('error_loading_history'.i18n.replaceAll('_', ' ')),
+              Text('error_loading_history'.i18n),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(earningsProvider),

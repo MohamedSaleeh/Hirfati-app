@@ -43,7 +43,7 @@ class OrderLocationCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'location_details'.i18n.replaceAll('_', ' '),
+                'location_details'.i18n,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

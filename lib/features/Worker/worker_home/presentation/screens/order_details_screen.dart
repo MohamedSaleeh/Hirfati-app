@@ -20,7 +20,7 @@ class OrderDetailsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        title: Text('order_details'.i18n.replaceAll('_', ' ')),
+        title: Text('order_details'.i18n),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,

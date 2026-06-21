@@ -68,9 +68,7 @@ class _EditServiceDialogState extends ConsumerState<EditServiceDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'service_updated_successfully'.i18n.replaceAll('_', ' '),
-            ),
+            content: Text('service_updated_successfully'.i18n),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -80,7 +78,7 @@ class _EditServiceDialogState extends ConsumerState<EditServiceDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('error_updating_service'.i18n.replaceAll('_', ' ')),
+            content: Text('error_updating_service'.i18n),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -96,7 +94,7 @@ class _EditServiceDialogState extends ConsumerState<EditServiceDialog> {
 
     return AlertDialog(
       title: Text(
-        'edit_service'.i18n.replaceAll('_', ' '),
+        'edit_service'.i18n,
         style: TextStyle(color: theme.colorScheme.onSurface),
       ),
       content: SingleChildScrollView(

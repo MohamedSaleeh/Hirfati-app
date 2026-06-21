@@ -14,7 +14,6 @@ abstract class WorkerProfileModel with _$WorkerProfileModel {
     required bool isAvailable,
     required double latitude,
     required double longitude,
-    required String shamCashCode,
   }) = _WorkerProfileModel;
 
   factory WorkerProfileModel.fromJson(Map<String, dynamic> json) =>

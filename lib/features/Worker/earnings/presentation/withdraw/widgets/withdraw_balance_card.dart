@@ -35,7 +35,7 @@ class WithdrawBalanceCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'available_balance'.i18n.replaceAll('_', ' '),
+            'available_balance'.i18n,
             style: TextStyle(
               fontSize: 14,
               color: Colors.white.withValues(alpha: 0.8),

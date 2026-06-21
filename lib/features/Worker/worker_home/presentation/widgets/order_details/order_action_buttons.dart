@@ -45,7 +45,7 @@ class OrderActionButtons extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('start_job'.i18n.replaceAll('_', ' ')),
+                child: Text('start_job'.i18n),
               ),
             ),
           if (isInProgress)
@@ -85,7 +85,7 @@ class OrderActionButtons extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text('complete_job'.i18n.replaceAll('_', ' ')),
+                child: Text('complete_job'.i18n),
               ),
             ),
         ],

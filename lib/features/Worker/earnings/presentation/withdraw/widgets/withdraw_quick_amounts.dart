@@ -23,7 +23,7 @@ class WithdrawQuickAmounts extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'quick_amounts'.i18n.replaceAll('_', ' '),
+            'quick_amounts'.i18n,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,

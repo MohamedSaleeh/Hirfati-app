@@ -16,7 +16,6 @@ _WorkerProfileModel _$WorkerProfileModelFromJson(Map<String, dynamic> json) =>
       isAvailable: json['isAvailable'] as bool,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
-      shamCashCode: json['shamCashCode'] as String,
     );
 
 Map<String, dynamic> _$WorkerProfileModelToJson(_WorkerProfileModel instance) =>
@@ -29,5 +28,4 @@ Map<String, dynamic> _$WorkerProfileModelToJson(_WorkerProfileModel instance) =>
       'isAvailable': instance.isAvailable,
       'latitude': instance.latitude,
       'longitude': instance.longitude,
-      'shamCashCode': instance.shamCashCode,
     };

@@ -21,20 +21,7 @@ class EarningsRepositoryImpl implements EarningsRepository {
     return await _datasource.getRecentTransactions(userId, limit: limit);
   }
 
-  // ✅ دالة السحب إلى شام كاش
-  @override
-  Future<void> withdrawToShamCash({
-    required String userId,
-    required double amount,
-  }) async {
-    await _datasource.withdrawToShamCash(userId: userId, amount: amount);
-  }
 
-  // ✅ دالة الحصول على رصيد شام كاش
-  @override
-  Future<double> getShamCashBalance(String userId) async {
-    return await _datasource.getShamCashBalance(userId);
-  }
 
   // ⚠️ تم تعطيلها
   @override

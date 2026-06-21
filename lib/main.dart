@@ -6,7 +6,7 @@ import 'package:i18n_extension/i18n_extension.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hirfati/router.dart';
 import 'core/presentation/providers/theme_provider.dart';
-import 'core/services/notification_service.dart';
+import 'core/services/notification_service.dart';       
 import 'theme.dart';
 import 'translations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -48,7 +48,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      title: 'hirfati',
+      title: 'WAQF',
       theme: AppTheme.light.copyWith(),
       darkTheme: AppTheme.dark,
       themeMode: themeModeAsync.when(

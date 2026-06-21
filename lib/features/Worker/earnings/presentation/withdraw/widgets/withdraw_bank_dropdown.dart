@@ -26,7 +26,7 @@ class WithdrawBankDropdown extends StatelessWidget {
           hint: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              'select_bank'.i18n.replaceAll('_', ' '),
+              'select_bank'.i18n,
               style: TextStyle(color: Colors.grey.shade500),
             ),
           ),

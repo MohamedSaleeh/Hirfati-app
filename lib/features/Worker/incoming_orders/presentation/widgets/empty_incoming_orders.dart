@@ -12,10 +12,14 @@ class EmptyIncomingOrders extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade400),
+            Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
             const SizedBox(height: 16),
             Text(
-              'no_incoming_orders'.i18n.replaceAll('_', ' '),
+              'no_incoming_orders'.i18n,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -24,8 +28,11 @@ class EmptyIncomingOrders extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'check_back_later'.i18n.replaceAll('_', ' '),
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+              'check_back_later'.i18n,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

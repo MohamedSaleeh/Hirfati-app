@@ -65,7 +65,7 @@ class OrderStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'current_status'.i18n.replaceAll('_', ' '),
+                  'current_status'.i18n,
                   style: TextStyle(
                     fontSize: 12,
                     color: statusColor.withValues(alpha: 0.7),

@@ -54,9 +54,7 @@ class _AddServiceDialogState extends ConsumerState<AddServiceDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'service_added_successfully'.i18n.replaceAll('_', ' '),
-            ),
+            content: Text('service_added_successfully'.i18n),
             backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
@@ -66,7 +64,7 @@ class _AddServiceDialogState extends ConsumerState<AddServiceDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('error_adding_service'.i18n.replaceAll('_', ' ')),
+            content: Text('error_adding_service'.i18n),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -82,7 +80,7 @@ class _AddServiceDialogState extends ConsumerState<AddServiceDialog> {
 
     return AlertDialog(
       title: Text(
-        'add_new_service'.i18n.replaceAll('_', ' '),
+        'add_new_service'.i18n,
         style: TextStyle(color: theme.colorScheme.onSurface),
       ),
       content: SingleChildScrollView(

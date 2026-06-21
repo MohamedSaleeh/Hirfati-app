@@ -155,7 +155,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                 : () {
                     if (_form.valid) {
                       final email = _form.control('email').value as String;
+                      print('[+] Sending reset email to: $email ...');
+
                       notifier.sendResetEmail(email.trim());
+                      print('[+] Reset email sent to: $email successfully.');
                     } else {
                       _form.markAllAsTouched();
                     }
@@ -245,7 +248,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             },
             icon: Icon(Icons.email_outlined, color: colorScheme.primary),
             label: Text(
-              'use_another_email'.i18n.replaceAll('_', ' '),
+              'use_another_email'.i18n,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

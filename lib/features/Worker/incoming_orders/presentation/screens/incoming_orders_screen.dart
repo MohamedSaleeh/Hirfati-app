@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../../translations.dart';
-import '../../../worker_home/presentation/providers/active_jobs_provider.dart';
 import '../providers/incoming_orders_provider.dart';
 import '../widgets/incoming_order_card.dart';
 import '../widgets/empty_incoming_orders.dart';
@@ -45,13 +44,10 @@ class IncomingOrdersScreen extends ConsumerWidget {
                   onAccept: () async {
                     try {
                       await notifier.acceptOrder(order.id);
-                      ref.invalidate(activeJobsProvider);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(
-                              'order_accepted'.i18n.replaceAll('_', ' '),
-                            ),
+                            content: Text('order_accepted'.i18n),
                             backgroundColor: Colors.green,
                           ),
                         );
@@ -60,9 +56,7 @@ class IncomingOrdersScreen extends ConsumerWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(
-                              'error_accepting_order'.i18n.replaceAll('_', ' '),
-                            ),
+                            content: Text('error_accepting_order'.i18n),
                             backgroundColor: colorScheme.error,
                           ),
                         );
@@ -76,9 +70,7 @@ class IncomingOrdersScreen extends ConsumerWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(
-                              'error_rejecting_order'.i18n.replaceAll('_', ' '),
-                            ),
+                            content: Text('error_rejecting_order'.i18n),
                             backgroundColor: colorScheme.error,
                           ),
                         );
@@ -104,7 +96,7 @@ class IncomingOrdersScreen extends ConsumerWidget {
                 Icon(Icons.error_outline, size: 48, color: colorScheme.error),
                 const SizedBox(height: 16),
                 Text(
-                  'error_loading_orders'.i18n.replaceAll('_', ' '),
+                  'error_loading_orders'.i18n,
                   style: TextStyle(color: colorScheme.onSurface),
                 ),
                 const SizedBox(height: 16),

@@ -47,7 +47,7 @@ class OrderScheduleCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'schedule_details'.i18n.replaceAll('_', ' '),
+                'schedule_details'.i18n,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ class OrderScheduleCard extends StatelessWidget {
                 Icon(Icons.timer, size: 16, color: Colors.orange),
                 const SizedBox(width: 8),
                 Text(
-                  'immediate_request'.i18n.replaceAll('_', ' '),
+                  'immediate_request'.i18n,
                   style: TextStyle(color: Colors.orange),
                 ),
               ],

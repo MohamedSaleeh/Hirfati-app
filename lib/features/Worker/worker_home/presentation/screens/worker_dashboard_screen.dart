@@ -38,7 +38,7 @@ class WorkerDashboardScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       appBar: AppBar(
         title: Text(
-          'welcome_back'.i18n.replaceAll('_', ' ') + ' \n$userName',
+          'welcome_back'.i18n + ' \n$userName',
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -225,8 +225,7 @@ class WorkerDashboardScreen extends ConsumerWidget {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'order_accepted_successfully'.i18n
-                                        .replaceAll('_', ' '),
+                                    'order_accepted_successfully'.i18n,
                                   ),
                                 ),
                               );
@@ -343,9 +342,7 @@ class WorkerDashboardScreen extends ConsumerWidget {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(
-                                    'job_completed'.i18n.replaceAll('_', ' '),
-                                  ),
+                                  content: Text('job_completed'.i18n),
                                   backgroundColor: Colors.green,
                                 ),
                               );

@@ -20,17 +20,19 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   void initState() {
     super.initState();
-    _form = FormGroup(
-      {
-        'password': FormControl<String>(
-          validators: [Validators.required, Validators.minLength(6)],
-        ),
-        'confirmPassword': FormControl<String>(
-          validators: [Validators.required],
-        ),
-      },
-      validators: [Validators.mustMatch('password', 'confirmPassword')],
-    );
+    _form = FormGroup({
+      'password': FormControl<String>(
+        validators: [
+          Validators.required,
+          Validators.minLength(6),
+        ],
+      ),
+      'confirmPassword': FormControl<String>(
+        validators: [Validators.required],
+      ),
+    }, validators: [
+      Validators.mustMatch('password', 'confirmPassword'),
+    ]);
   }
 
   @override
@@ -69,7 +71,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 20),
-              Icon(Icons.lock_outline, size: 80, color: colorScheme.primary),
+              Icon(
+                Icons.lock_outline,
+                size: 80,
+                color: colorScheme.primary,
+              ),
               const SizedBox(height: 24),
               Text(
                 'create new password title'.i18n,
@@ -105,18 +111,14 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: colorScheme.primary,
-                      width: 2,
-                    ),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 2),
                   ),
                   filled: true,
                   fillColor: colorScheme.surface,
                 ),
                 validationMessages: {
                   ValidationMessage.required: (_) => 'password_required'.i18n,
-                  ValidationMessage.minLength: (_) =>
-                      'password_min_length'.i18n,
+                  ValidationMessage.minLength: (_) => 'password_min_length'.i18n,
                 },
               ),
               const SizedBox(height: 16),
@@ -136,17 +138,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: colorScheme.primary,
-                      width: 2,
-                    ),
+                    borderSide: BorderSide(color: colorScheme.primary, width: 2),
                   ),
                   filled: true,
                   fillColor: colorScheme.surface,
                 ),
                 validationMessages: {
-                  ValidationMessage.required: (_) =>
-                      'confirm password required'.i18n,
+                  ValidationMessage.required: (_) => 'confirm password required'.i18n,
                 },
               ),
 
@@ -170,8 +168,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                       ? null
                       : () {
                           if (_form.valid) {
-                            final password =
-                                _form.control('password').value as String;
+                            final password = _form.control('password').value as String;
                             notifier.resetPassword(password, password);
                           } else {
                             _form.markAllAsTouched();
@@ -195,11 +192,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                           ),
                         )
                       : Text(
-                          'reset_password_button'.i18n.replaceAll('_', ' '),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          'reset_password_button'.i18n,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                 ),
               ),

@@ -50,7 +50,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('settings_updated'.i18n.replaceAll('_', ' ')),
+            content: Text('settings_updated'.i18n),
             backgroundColor: theme.colorScheme.primary,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -66,7 +66,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('error_updating_settings'.i18n.replaceAll('_', ' ')),
+            content: Text('error_updating_settings'.i18n),
             backgroundColor: theme.colorScheme.error,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -89,7 +89,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
       appBar: AppBar(
         title: Text(
-          'account_settings'.i18n.replaceAll('_', ' '),
+          'account_settings'.i18n,
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 20,
@@ -189,7 +189,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          'member_since'.i18n.replaceAll('_', ' '),
+                          'member_since'.i18n,
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.primary,
@@ -227,7 +227,7 @@ class _AccountSettingsScreenState extends ConsumerState<AccountSettingsScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'error_loading_settings'.i18n.replaceAll('_', ' '),
+                'error_loading_settings'.i18n,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,

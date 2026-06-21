@@ -42,13 +42,20 @@ class WorkerStatsCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'completed_jobs'.i18n.replaceAll('_', ' '),
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                'completed_jobs'.i18n,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
               ),
             ],
           ),
           // Divider
-          Container(width: 1, height: 40, color: Colors.grey.shade300),
+          Container(
+            width: 1,
+            height: 40,
+            color: Colors.grey.shade300,
+          ),
           // Working Hours
           Column(
             children: [
@@ -61,8 +68,11 @@ class WorkerStatsCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'working_hours'.i18n.replaceAll('_', ' '),
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                'working_hours'.i18n,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
               ),
             ],
           ),

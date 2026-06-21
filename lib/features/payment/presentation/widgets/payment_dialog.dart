@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/models/order.dart';
 import '../../../../translations.dart';
 import '../providers/payment_notifier.dart';
@@ -223,33 +222,7 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           },
           contentPadding: EdgeInsets.zero,
         ),
-        RadioListTile(
-          title: Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet,
-                  size: 14,
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text('Sham Cash'.i18n),
-            ],
-          ),
-          value: 'sham_cash',
-          groupValue: _selectedMethod,
-          onChanged: (value) {
-            setState(() => _selectedMethod = value!);
-          },
-          contentPadding: EdgeInsets.zero,
-        ),
+    
       ],
     );
   }
@@ -317,28 +290,14 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           paymentMethod: _selectedMethod,
           cardDetails: cardDetails,
         );
-      } else if (_selectedMethod == 'sham_cash') {
-        context.push(
-          '/shamcash-payment',
-          extra: {
-            'orderId': widget.order.id,
-            'amount': widget.order.price,
-            'workerName': widget.order.workerName,
-            'serviceTitle': widget.order.serviceTitle,
-          },
-        );
-
-        Navigator.pop(context);
-        widget.onSuccess();
-        success = true;
-      } else {
+      }  else {
         success = await paymentNotifier.processPayment(
           order: widget.order,
           paymentMethod: _selectedMethod,
         );
       }
 
-      if (success && mounted && _selectedMethod != 'sham_cash') {
+      if (success && mounted ) {
         Navigator.pop(context);
         widget.onSuccess();
       }
@@ -352,7 +311,7 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
         );
       }
     } finally {
-      if (mounted && _selectedMethod != 'sham_cash') {
+      if (mounted) {
         setState(() => _isProcessing = false);
       }
     }

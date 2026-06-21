@@ -12,7 +12,6 @@ import '../widgets/availability_switch.dart';
 import '../widgets/experience_field.dart';
 import '../widgets/price_fields.dart';
 import '../widgets/profession_chip.dart';
-import '../widgets/sham_cash_code_field.dart';
 
 class CompleteProfessionalProfileScreen extends ConsumerStatefulWidget {
   const CompleteProfessionalProfileScreen({super.key});
@@ -43,14 +42,7 @@ class _CompleteProfessionalProfileScreenState
         ),
         'priceMax': FormControl<double>(validators: [Validators.required]),
         'isAvailable': FormControl<bool>(value: true),
-        'shamCashCode': FormControl<String>(
-          validators: [
-            Validators.required,
-            Validators.minLength(6),
-            Validators.maxLength(20),
-            Validators.pattern(r'^[A-Z0-9]{6,20}$'),
-          ],
-        ),
+
       },
       validators: [Validators.delegate(_priceComparisonValidator)],
     );
@@ -114,7 +106,6 @@ class _CompleteProfessionalProfileScreenState
       isAvailable: data['isAvailable'] as bool? ?? true,
       latitude: lat,
       longitude: lng,
-      shamCashCode: data['shamCashCode'] as String,
     );
 
     final success = await ref
@@ -234,8 +225,6 @@ class _CompleteProfessionalProfileScreenState
               ),
               const SizedBox(height: 16),
 
-              const ShamCashCodeField(formControlName: 'shamCashCode'),
-              const SizedBox(height: 16),
 
               const PriceFields(
                 minControlName: 'priceMin',

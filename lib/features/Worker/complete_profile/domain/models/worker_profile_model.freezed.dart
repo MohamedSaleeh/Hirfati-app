@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$WorkerProfileModel {
 
- String get categoryId; int get experienceYears; String get bio; double get priceMin; double get priceMax; bool get isAvailable; double get latitude; double get longitude; String get shamCashCode;
+ String get categoryId; int get experienceYears; String get bio; double get priceMin; double get priceMax; bool get isAvailable; double get latitude; double get longitude;
 /// Create a copy of WorkerProfileModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $WorkerProfileModelCopyWith<WorkerProfileModel> get copyWith => _$WorkerProfileM
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkerProfileModel&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.experienceYears, experienceYears) || other.experienceYears == experienceYears)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.priceMin, priceMin) || other.priceMin == priceMin)&&(identical(other.priceMax, priceMax) || other.priceMax == priceMax)&&(identical(other.isAvailable, isAvailable) || other.isAvailable == isAvailable)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.shamCashCode, shamCashCode) || other.shamCashCode == shamCashCode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WorkerProfileModel&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.experienceYears, experienceYears) || other.experienceYears == experienceYears)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.priceMin, priceMin) || other.priceMin == priceMin)&&(identical(other.priceMax, priceMax) || other.priceMax == priceMax)&&(identical(other.isAvailable, isAvailable) || other.isAvailable == isAvailable)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,categoryId,experienceYears,bio,priceMin,priceMax,isAvailable,latitude,longitude,shamCashCode);
+int get hashCode => Object.hash(runtimeType,categoryId,experienceYears,bio,priceMin,priceMax,isAvailable,latitude,longitude);
 
 @override
 String toString() {
-  return 'WorkerProfileModel(categoryId: $categoryId, experienceYears: $experienceYears, bio: $bio, priceMin: $priceMin, priceMax: $priceMax, isAvailable: $isAvailable, latitude: $latitude, longitude: $longitude, shamCashCode: $shamCashCode)';
+  return 'WorkerProfileModel(categoryId: $categoryId, experienceYears: $experienceYears, bio: $bio, priceMin: $priceMin, priceMax: $priceMax, isAvailable: $isAvailable, latitude: $latitude, longitude: $longitude)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $WorkerProfileModelCopyWith<$Res>  {
   factory $WorkerProfileModelCopyWith(WorkerProfileModel value, $Res Function(WorkerProfileModel) _then) = _$WorkerProfileModelCopyWithImpl;
 @useResult
 $Res call({
- String categoryId, int experienceYears, String bio, double priceMin, double priceMax, bool isAvailable, double latitude, double longitude, String shamCashCode
+ String categoryId, int experienceYears, String bio, double priceMin, double priceMax, bool isAvailable, double latitude, double longitude
 });
 
 
@@ -65,7 +65,7 @@ class _$WorkerProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of WorkerProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? categoryId = null,Object? experienceYears = null,Object? bio = null,Object? priceMin = null,Object? priceMax = null,Object? isAvailable = null,Object? latitude = null,Object? longitude = null,Object? shamCashCode = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? categoryId = null,Object? experienceYears = null,Object? bio = null,Object? priceMin = null,Object? priceMax = null,Object? isAvailable = null,Object? latitude = null,Object? longitude = null,}) {
   return _then(_self.copyWith(
 categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String,experienceYears: null == experienceYears ? _self.experienceYears : experienceYears // ignore: cast_nullable_to_non_nullable
@@ -75,8 +75,7 @@ as double,priceMax: null == priceMax ? _self.priceMax : priceMax // ignore: cast
 as double,isAvailable: null == isAvailable ? _self.isAvailable : isAvailable // ignore: cast_nullable_to_non_nullable
 as bool,latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
 as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double,shamCashCode: null == shamCashCode ? _self.shamCashCode : shamCashCode // ignore: cast_nullable_to_non_nullable
-as String,
+as double,
   ));
 }
 
@@ -161,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String categoryId,  int experienceYears,  String bio,  double priceMin,  double priceMax,  bool isAvailable,  double latitude,  double longitude,  String shamCashCode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String categoryId,  int experienceYears,  String bio,  double priceMin,  double priceMax,  bool isAvailable,  double latitude,  double longitude)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WorkerProfileModel() when $default != null:
-return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,_that.priceMax,_that.isAvailable,_that.latitude,_that.longitude,_that.shamCashCode);case _:
+return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,_that.priceMax,_that.isAvailable,_that.latitude,_that.longitude);case _:
   return orElse();
 
 }
@@ -182,10 +181,10 @@ return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String categoryId,  int experienceYears,  String bio,  double priceMin,  double priceMax,  bool isAvailable,  double latitude,  double longitude,  String shamCashCode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String categoryId,  int experienceYears,  String bio,  double priceMin,  double priceMax,  bool isAvailable,  double latitude,  double longitude)  $default,) {final _that = this;
 switch (_that) {
 case _WorkerProfileModel():
-return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,_that.priceMax,_that.isAvailable,_that.latitude,_that.longitude,_that.shamCashCode);case _:
+return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,_that.priceMax,_that.isAvailable,_that.latitude,_that.longitude);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +201,10 @@ return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String categoryId,  int experienceYears,  String bio,  double priceMin,  double priceMax,  bool isAvailable,  double latitude,  double longitude,  String shamCashCode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String categoryId,  int experienceYears,  String bio,  double priceMin,  double priceMax,  bool isAvailable,  double latitude,  double longitude)?  $default,) {final _that = this;
 switch (_that) {
 case _WorkerProfileModel() when $default != null:
-return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,_that.priceMax,_that.isAvailable,_that.latitude,_that.longitude,_that.shamCashCode);case _:
+return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,_that.priceMax,_that.isAvailable,_that.latitude,_that.longitude);case _:
   return null;
 
 }
@@ -217,7 +216,7 @@ return $default(_that.categoryId,_that.experienceYears,_that.bio,_that.priceMin,
 @JsonSerializable()
 
 class _WorkerProfileModel implements WorkerProfileModel {
-  const _WorkerProfileModel({required this.categoryId, required this.experienceYears, required this.bio, required this.priceMin, required this.priceMax, required this.isAvailable, required this.latitude, required this.longitude, required this.shamCashCode});
+  const _WorkerProfileModel({required this.categoryId, required this.experienceYears, required this.bio, required this.priceMin, required this.priceMax, required this.isAvailable, required this.latitude, required this.longitude});
   factory _WorkerProfileModel.fromJson(Map<String, dynamic> json) => _$WorkerProfileModelFromJson(json);
 
 @override final  String categoryId;
@@ -228,7 +227,6 @@ class _WorkerProfileModel implements WorkerProfileModel {
 @override final  bool isAvailable;
 @override final  double latitude;
 @override final  double longitude;
-@override final  String shamCashCode;
 
 /// Create a copy of WorkerProfileModel
 /// with the given fields replaced by the non-null parameter values.
@@ -243,16 +241,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkerProfileModel&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.experienceYears, experienceYears) || other.experienceYears == experienceYears)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.priceMin, priceMin) || other.priceMin == priceMin)&&(identical(other.priceMax, priceMax) || other.priceMax == priceMax)&&(identical(other.isAvailable, isAvailable) || other.isAvailable == isAvailable)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.shamCashCode, shamCashCode) || other.shamCashCode == shamCashCode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _WorkerProfileModel&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.experienceYears, experienceYears) || other.experienceYears == experienceYears)&&(identical(other.bio, bio) || other.bio == bio)&&(identical(other.priceMin, priceMin) || other.priceMin == priceMin)&&(identical(other.priceMax, priceMax) || other.priceMax == priceMax)&&(identical(other.isAvailable, isAvailable) || other.isAvailable == isAvailable)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,categoryId,experienceYears,bio,priceMin,priceMax,isAvailable,latitude,longitude,shamCashCode);
+int get hashCode => Object.hash(runtimeType,categoryId,experienceYears,bio,priceMin,priceMax,isAvailable,latitude,longitude);
 
 @override
 String toString() {
-  return 'WorkerProfileModel(categoryId: $categoryId, experienceYears: $experienceYears, bio: $bio, priceMin: $priceMin, priceMax: $priceMax, isAvailable: $isAvailable, latitude: $latitude, longitude: $longitude, shamCashCode: $shamCashCode)';
+  return 'WorkerProfileModel(categoryId: $categoryId, experienceYears: $experienceYears, bio: $bio, priceMin: $priceMin, priceMax: $priceMax, isAvailable: $isAvailable, latitude: $latitude, longitude: $longitude)';
 }
 
 
@@ -263,7 +261,7 @@ abstract mixin class _$WorkerProfileModelCopyWith<$Res> implements $WorkerProfil
   factory _$WorkerProfileModelCopyWith(_WorkerProfileModel value, $Res Function(_WorkerProfileModel) _then) = __$WorkerProfileModelCopyWithImpl;
 @override @useResult
 $Res call({
- String categoryId, int experienceYears, String bio, double priceMin, double priceMax, bool isAvailable, double latitude, double longitude, String shamCashCode
+ String categoryId, int experienceYears, String bio, double priceMin, double priceMax, bool isAvailable, double latitude, double longitude
 });
 
 
@@ -280,7 +278,7 @@ class __$WorkerProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of WorkerProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? categoryId = null,Object? experienceYears = null,Object? bio = null,Object? priceMin = null,Object? priceMax = null,Object? isAvailable = null,Object? latitude = null,Object? longitude = null,Object? shamCashCode = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? categoryId = null,Object? experienceYears = null,Object? bio = null,Object? priceMin = null,Object? priceMax = null,Object? isAvailable = null,Object? latitude = null,Object? longitude = null,}) {
   return _then(_WorkerProfileModel(
 categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String,experienceYears: null == experienceYears ? _self.experienceYears : experienceYears // ignore: cast_nullable_to_non_nullable
@@ -290,8 +288,7 @@ as double,priceMax: null == priceMax ? _self.priceMax : priceMax // ignore: cast
 as double,isAvailable: null == isAvailable ? _self.isAvailable : isAvailable // ignore: cast_nullable_to_non_nullable
 as bool,latitude: null == latitude ? _self.latitude : latitude // ignore: cast_nullable_to_non_nullable
 as double,longitude: null == longitude ? _self.longitude : longitude // ignore: cast_nullable_to_non_nullable
-as double,shamCashCode: null == shamCashCode ? _self.shamCashCode : shamCashCode // ignore: cast_nullable_to_non_nullable
-as String,
+as double,
   ));
 }
 

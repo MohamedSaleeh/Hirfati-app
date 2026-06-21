@@ -65,23 +65,7 @@ class EarningsNotifier
     }
   }
 
-  Future<void> withdrawToShamCash({required double amount}) async {
-    if (_isDisposed) return;
 
-    _updateState(const AsyncLoading());
-    try {
-      await _repository.withdrawToShamCash(userId: _userId, amount: amount);
-
-      if (!_isDisposed) {
-        await loadData();
-      }
-    } catch (e, st) {
-      if (!_isDisposed) {
-        _updateState(AsyncError(e, st));
-      }
-      rethrow;
-    }
-  }
 
   // ⚠️ دالة السحب القديمة (معطلة)
   Future<void> requestWithdrawal({

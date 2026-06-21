@@ -20,7 +20,7 @@ class FaceUploadCard extends StatelessWidget {
       maxHeight: 800,
       imageQuality: 80,
     );
-
+    
     if (image != null) {
       onUpload(image.path);
     }
@@ -47,7 +47,7 @@ class FaceUploadCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'face_verification'.i18n.replaceAll('_', ' '),
+                  'face_verification'.i18n,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -59,7 +59,7 @@ class FaceUploadCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'selfie_match_description'.i18n.replaceAll('_', ' '),
+            'selfie_match_description'.i18n,
             style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 20),
@@ -74,9 +74,7 @@ class FaceUploadCard extends StatelessWidget {
                     : colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isUploaded
-                      ? colorScheme.primary
-                      : colorScheme.outlineVariant,
+                  color: isUploaded ? colorScheme.primary : colorScheme.outlineVariant,
                 ),
               ),
               child: Center(
@@ -86,19 +84,13 @@ class FaceUploadCard extends StatelessWidget {
                     Icon(
                       isUploaded ? Icons.check_circle : Icons.camera_alt,
                       size: 40,
-                      color: isUploaded
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
+                      color: isUploaded ? colorScheme.primary : colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      isUploaded
-                          ? 'uploaded'.i18n
-                          : 'tap_to_upload_face'.i18n.replaceAll('_', ' '),
+                      isUploaded ? 'uploaded'.i18n : 'tap_to_upload_face'.i18n,
                       style: TextStyle(
-                        color: isUploaded
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
+                        color: isUploaded ? colorScheme.primary : colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],

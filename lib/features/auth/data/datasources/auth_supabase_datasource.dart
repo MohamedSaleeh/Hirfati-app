@@ -2,7 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthSupabaseDatasource {
   final SupabaseClient _client;
-  
+
   AuthSupabaseDatasource(this._client);
 
   Future<AuthResponse> signUp({
@@ -16,7 +16,10 @@ class AuthSupabaseDatasource {
     required String email,
     required String password,
   }) async {
-    return await _client.auth.signInWithPassword(email: email, password: password);
+    return await _client.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
   }
 
   Future<void> signOut() async {
@@ -28,7 +31,12 @@ class AuthSupabaseDatasource {
   }
 
   Future<void> resetPasswordForEmail(String email) async {
-    await _client.auth.resetPasswordForEmail(email);
+    try {
+      await _client.auth.resetPasswordForEmail(email);
+    } catch (e) {
+      print('[-] Error occurred while resetting password: $e');
+      rethrow;
+    }
   }
 
   Future<void> updateUserPassword(String newPassword) async {
@@ -59,14 +67,13 @@ class AuthSupabaseDatasource {
   }
 
   Future<bool> isWorkerProfileCompleted(String userId) async {
-  final response = await _client
-      .from('workers')
-      .select('profile_completed')
-      .eq('user_id', userId)
-      .maybeSingle();
+    final response = await _client
+        .from('workers')
+        .select('profile_completed')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-  if (response == null) return false;
-  return response['profile_completed'] as bool? ?? false;
-}
-
+    if (response == null) return false;
+    return response['profile_completed'] as bool? ?? false;
+  }
 }

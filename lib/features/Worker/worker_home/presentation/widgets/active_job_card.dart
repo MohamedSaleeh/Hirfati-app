@@ -136,9 +136,7 @@ class ActiveJobCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    isInProgress
-                        ? 'in_progress'.i18n.replaceAll('_', ' ')
-                        : 'accepted'.i18n,
+                    isInProgress ? 'in_progress'.i18n : 'accepted'.i18n,
                     style: TextStyle(
                       fontSize: 10,
                       color: isInProgress ? Colors.blue : Colors.orange,
@@ -186,8 +184,7 @@ class ActiveJobCard extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'job_completed_payment_request_sent'.i18n
-                                      .replaceAll('_', ' '),
+                                  'job_completed_payment_request_sent'.i18n,
                                 ),
                                 backgroundColor: Colors.green,
                                 duration: const Duration(seconds: 3),

@@ -8,12 +8,7 @@ abstract class EarningsRepository {
     int limit = 10,
   });
   
-  Future<void> withdrawToShamCash({
-    required String userId,
-    required double amount,
-  });
-  
-  Future<double> getShamCashBalance(String userId);
+
   
 
   Future<void> requestWithdrawal({

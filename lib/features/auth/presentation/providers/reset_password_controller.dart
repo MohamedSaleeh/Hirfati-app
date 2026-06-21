@@ -5,8 +5,8 @@ import '../../domain/models/reset_password_state.dart';
 
 final resetPasswordControllerProvider =
     StateNotifierProvider<ResetPasswordController, ResetPasswordState>(
-  (ref) => ResetPasswordController(ref),
-);
+      (ref) => ResetPasswordController(ref),
+    );
 
 class ResetPasswordController extends StateNotifier<ResetPasswordState> {
   final Ref _ref;
@@ -24,12 +24,9 @@ class ResetPasswordController extends StateNotifier<ResetPasswordState> {
     try {
       final repository = _ref.read(authRepositoryProvider);
       await repository.sendPasswordResetEmail(email);
-      
-      state = state.copyWith(
-        isLoading: false,
-        emailSent: true,
-        email: email,
-      );
+      print('[+] Password reset email sent to: $email successfully.');
+
+      state = state.copyWith(isLoading: false, emailSent: true, email: email);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -45,7 +42,9 @@ class ResetPasswordController extends StateNotifier<ResetPasswordState> {
     }
 
     if (newPassword.length < 6) {
-      state = state.copyWith(errorMessage: 'Password must be at least 6 characters');
+      state = state.copyWith(
+        errorMessage: 'Password must be at least 6 characters',
+      );
       return;
     }
 
@@ -59,11 +58,8 @@ class ResetPasswordController extends StateNotifier<ResetPasswordState> {
     try {
       final repository = _ref.read(authRepositoryProvider);
       await repository.updatePassword(newPassword);
-      
-      state = state.copyWith(
-        isLoading: false,
-        emailSent: false,
-      );
+
+      state = state.copyWith(isLoading: false, emailSent: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

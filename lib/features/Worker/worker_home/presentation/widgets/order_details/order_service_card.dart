@@ -44,7 +44,7 @@ class OrderServiceCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'service_details'.i18n.replaceAll('_', ' '),
+                'service_details'.i18n,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

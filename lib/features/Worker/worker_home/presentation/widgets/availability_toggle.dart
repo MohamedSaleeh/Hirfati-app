@@ -55,9 +55,7 @@ class AvailabilityToggle extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    isOnline
-                        ? 'online_now'.i18n.replaceAll('_', ' ')
-                        : 'offline'.i18n,
+                    isOnline ? 'online_now'.i18n : 'offline'.i18n,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: isOnline ? Colors.green : Colors.grey,

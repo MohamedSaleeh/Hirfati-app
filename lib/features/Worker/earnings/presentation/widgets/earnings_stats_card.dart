@@ -41,7 +41,7 @@ class EarningsStatsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'this_week_earnings'.i18n.replaceAll('_', ' '),
+                  'this_week_earnings'.i18n,
                   style: TextStyle(
                     fontSize: 12,
                     color: colorScheme.onSurfaceVariant,
@@ -87,7 +87,7 @@ class EarningsStatsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  'completed_orders'.i18n.replaceAll('_', ' '),
+                  'completed_orders'.i18n,
                   style: TextStyle(
                     fontSize: 12,
                     color: colorScheme.onSurfaceVariant,

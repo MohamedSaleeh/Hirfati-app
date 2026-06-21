@@ -33,7 +33,7 @@ class _EarningsSummaryCardState extends ConsumerState<EarningsSummaryCard> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Withdraw to Sham Cash'.i18n),
+        title: Text('Withdrawal is currently unavailable.'.i18n),
         content: Text(
           'Are you sure you want to withdraw ${widget.summary.availableBalance.toStringAsFixed(0)} \$ to your Sham Cash account?'
               .i18n,
@@ -60,10 +60,6 @@ class _EarningsSummaryCardState extends ConsumerState<EarningsSummaryCard> {
     setState(() => _isWithdrawing = true);
 
     try {
-      final notifier = ref.read(earningsProvider.notifier);
-      await notifier.withdrawToShamCash(
-        amount: widget.summary.availableBalance,
-      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -138,40 +134,8 @@ class _EarningsSummaryCardState extends ConsumerState<EarningsSummaryCard> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isWithdrawing ? null : _handleWithdraw,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.surface,
-                foregroundColor: theme.colorScheme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-              child: _isWithdrawing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.account_balance_wallet,
-                          size: 18,
-                          color: theme.colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'withdraw_to_sham_cash'.i18n,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
+              onPressed: null,
+              child: Text('Withdrawal is currently unavailable'.i18n),
             ),
           ),
         ],

@@ -139,7 +139,7 @@ class _WithdrawDialogState extends ConsumerState<WithdrawDialog> {
               ),
               const SizedBox(height: 8),
               Text(
-                'withdraw_notice'.i18n.replaceAll('_', ' '),
+                'withdraw_notice'.i18n,
                 style: TextStyle(
                   fontSize: 12,
                   color: colorScheme.onSurfaceVariant,

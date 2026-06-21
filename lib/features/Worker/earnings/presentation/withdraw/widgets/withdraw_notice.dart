@@ -20,7 +20,7 @@ class WithdrawNotice extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'withdraw_notice'.i18n.replaceAll('_', ' '),
+              'withdraw_notice'.i18n,
               style: TextStyle(fontSize: 12, color: Colors.blue.shade700),
             ),
           ),

@@ -78,23 +78,7 @@ class WorkerProfileScreen extends ConsumerWidget {
                               ref.invalidate(workerProfileProvider);
                             },
                           ),
-                          WorkerProfileMenuItem(
-                            icon: Icons.wallet,
-                            title: 'cham cach acount'.i18n,
-                            subtitle: '********************'.i18n,
-                            onTap: () {
-                              context.push('/sham-cash-details');
-                            },
-                          ),
 
-                          WorkerProfileMenuItem(
-                            icon: Icons.lock,
-                            title: "set pin".i18n,
-                            subtitle: "Set your 4-digit PIN",
-                            onTap: () {
-                              context.push('/set-pin');
-                            },
-                          ),
                           WorkerProfileMenuItem(
                             icon: Icons.language_outlined,
                             title: 'language'.i18n,
@@ -228,7 +212,7 @@ class WorkerProfileScreen extends ConsumerWidget {
             children: [
               Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('error_loading_profile'.i18n.replaceAll('_', ' ')),
+              Text('error_loading_profile'.i18n),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(workerProfileProvider),

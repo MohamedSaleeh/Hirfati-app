@@ -21,7 +21,7 @@ class EarningsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerHighest,
       appBar: AppBar(
-        title: Text('earnings_summary'.i18n.replaceAll('_', ' ')),
+        title: Text('earnings_summary'.i18n),
         centerTitle: true,
         backgroundColor: colorScheme.surface,
         elevation: 0,
@@ -31,7 +31,7 @@ class EarningsScreen extends ConsumerWidget {
             onPressed: () {
               context.push('/worker/withdrawal-history');
             },
-            tooltip: 'withdrawal_history'.i18n.replaceAll('_', ' '),
+            tooltip: 'withdrawal_history'.i18n,
           ),
         ],
       ),
@@ -82,7 +82,7 @@ class EarningsScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'recent_transactions'.i18n.replaceAll('_', ' '),
+                          'recent_transactions'.i18n,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -99,9 +99,7 @@ class EarningsScreen extends ConsumerWidget {
                                   !showAll;
                             },
                             child: Text(
-                              showAll
-                                  ? 'show_less'.i18n
-                                  : 'view_all'.i18n.replaceAll('_', ' '),
+                              showAll ? 'show_less'.i18n : 'view_all'.i18n,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -125,10 +123,8 @@ class EarningsScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'no_transactions'.i18n.replaceAll('_', ' '),
-                            style: TextStyle(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
+                            'no_transactions'.i18n,
+                            style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -161,7 +157,7 @@ class EarningsScreen extends ConsumerWidget {
             ),
           );
         },
-        loading: () => Center(
+        loading: () =>  Center(
           child: Lottie.asset(
             'assets/animations/loading_animation.json',
             width: 150,
@@ -175,17 +171,11 @@ class EarningsScreen extends ConsumerWidget {
             children: [
               Icon(Icons.error_outline, size: 48, color: colorScheme.error),
               const SizedBox(height: 16),
-              Text(
-                'error_loading_earnings'.i18n.replaceAll('_', ' '),
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
+              Text('error_loading_earnings'.i18n, style: TextStyle(color: colorScheme.onSurfaceVariant)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(earningsProvider),
-                child: Text(
-                  'retry'.i18n,
-                  style: TextStyle(color: colorScheme.onPrimary),
-                ),
+                child: Text('retry'.i18n, style: TextStyle(color: colorScheme.onPrimary)),
               ),
             ],
           ),

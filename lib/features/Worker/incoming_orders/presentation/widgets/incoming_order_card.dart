@@ -64,8 +64,8 @@ class IncomingOrderCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       isImmediate
-                          ? '${'immediate_request'.i18n.replaceAll('_', ' ')} - ${_getTimeAgo()}'
-                          : '${'scheduled_request'.i18n.replaceAll('_', ' ')} - ${order.scheduledAt != null ? _formatDate(order.scheduledAt!) : 'N/A'}',
+                          ? '${'immediate_request'.i18n} - ${_getTimeAgo()}'
+                          : '${'scheduled_request'.i18n} - ${order.scheduledAt != null ? _formatDate(order.scheduledAt!) : 'N/A'}',
                       style: TextStyle(
                         fontSize: 12,
                         color: isImmediate ? colorScheme.error : Colors.orange,

@@ -26,7 +26,6 @@ class WorkerProfileSupabaseDatasource {
     }
 
     try {
-      await _createShamCashAccount(userId, profile.shamCashCode);
 
       await _client.from('workers').insert({
         'user_id': userId,
@@ -52,52 +51,5 @@ class WorkerProfileSupabaseDatasource {
     }
   }
 
-  Future<void> _createShamCashAccount(String userId, String accountCode) async {
-    final userAccount = await _client
-        .from('sham_cash_accounts')
-        .select('user_id, account_code')
-        .eq('user_id', userId)
-        .maybeSingle();
 
-    if (userAccount != null) {
-      final existingWithCode = await _client
-          .from('sham_cash_accounts')
-          .select('user_id')
-          .eq('account_code', accountCode)
-          .neq('user_id', userId)
-          .maybeSingle();
-
-      if (existingWithCode != null) {
-        throw Exception(
-          'Sham Cash code already exists. Please use another code.',
-        );
-      }
-
-      await _client
-          .from('sham_cash_accounts')
-          .update({
-            'account_code': accountCode,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('user_id', userId);
-      return;
-    }
-
-    final existingAccount = await _client
-        .from('sham_cash_accounts')
-        .select('user_id')
-        .eq('account_code', accountCode)
-        .maybeSingle();
-
-    if (existingAccount != null) {
-      throw Exception(
-        'Sham Cash code already exists. Please use another code.',
-      );
-    }
-
-    await _client.rpc(
-      'create_sham_cash_account',
-      params: {'p_account_code': accountCode, 'p_pin': '1234'},
-    );
-  }
 }

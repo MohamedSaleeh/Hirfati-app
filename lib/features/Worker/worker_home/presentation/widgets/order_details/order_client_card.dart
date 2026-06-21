@@ -38,7 +38,7 @@ class OrderClientCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                'client_details'.i18n.replaceAll('_', ' '),
+                'client_details'.i18n,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -73,7 +73,7 @@ class OrderClientCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'client_since'.i18n.replaceAll('_', ' '),
+                      'client_since'.i18n,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey.shade500,

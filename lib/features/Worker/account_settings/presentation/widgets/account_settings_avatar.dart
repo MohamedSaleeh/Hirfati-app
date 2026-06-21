@@ -52,7 +52,7 @@ class AccountSettingsAvatar extends ConsumerWidget {
                 if (url != null && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('avatar_updated'.i18n.replaceAll('_', ' ')),
+                      content: Text('avatar_updated'.i18n),
                       backgroundColor: theme.colorScheme.primary,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(

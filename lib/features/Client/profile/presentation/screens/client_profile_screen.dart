@@ -154,24 +154,6 @@ class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
                             ),
                           ),
                         ),
-                        ProfileMenuItem(
-                          icon: Icons.wallet,
-                          title: 'Sham Cash Account'.i18n,
-                          subtitle: '********************'.i18n,
-                          onTap: () {
-                            context.push('/sham-cash-details');
-                          },
-                          enable: true,
-                        ),
-                        ProfileMenuItem(
-                          icon: Icons.lock,
-                          title: "set pin".i18n,
-                          subtitle: "Set your 4-digit PIN",
-                          onTap: () {
-                            context.push('/set-pin');
-                          },
-                          enable: true,
-                        ),
                       ]),
                       const SizedBox(height: 16),
                       _buildMenuSection(context, [

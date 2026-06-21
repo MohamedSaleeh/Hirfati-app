@@ -149,7 +149,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
         title: Text(
-          'request_withdrawal'.i18n.replaceAll('_', ' '),
+          'request_withdrawal'.i18n,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,

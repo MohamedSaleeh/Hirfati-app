@@ -24,7 +24,7 @@ class VerificationGuidelines extends StatelessWidget {
               Icon(Icons.info_outline, color: colorScheme.primary, size: 20),
               const SizedBox(width: 8),
               Text(
-                'verification_guidelines'.i18n.replaceAll('_', ' '),
+                'verification_guidelines'.i18n,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

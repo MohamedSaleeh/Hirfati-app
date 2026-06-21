@@ -20,7 +20,7 @@ class CategoriesPricingScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
       appBar: AppBar(
-        title: Text('categories_pricing'.i18n.replaceAll('_', ' ')),
+        title: Text('categories_pricing'.i18n),
         centerTitle: true,
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
@@ -101,7 +101,7 @@ class CategoriesPricingScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'no_services_added'.i18n.replaceAll('_', ' '),
+                          'no_services_added'.i18n,
                           style: TextStyle(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
@@ -160,7 +160,7 @@ class CategoriesPricingScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'error_loading_data'.i18n.replaceAll('_', ' '),
+                'error_loading_data'.i18n,
                 style: TextStyle(color: theme.colorScheme.onSurface),
               ),
               const SizedBox(height: 16),
@@ -181,10 +181,8 @@ class CategoriesPricingScreen extends ConsumerWidget {
     return await showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('delete_service'.i18n.replaceAll('_', ' ')),
-            content: Text(
-              'delete_service_confirmation'.i18n.replaceAll('_', ' '),
-            ),
+            title: Text('delete_service'.i18n),
+            content: Text('delete_service_confirmation'.i18n),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),

@@ -71,16 +71,16 @@ class _IdentityVerificationScreenState
     }
 
     if (!_hasDocuments) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('upload_id_document'.i18n.replaceAll('_', ' '))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('upload_id_document'.i18n)));
       return;
     }
 
     if (_selfieUrl == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('take_selfie'.i18n.replaceAll('_', ' '))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('take_selfie'.i18n)));
       return;
     }
 
@@ -113,7 +113,7 @@ class _IdentityVerificationScreenState
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('verification_submitted'.i18n.replaceAll('_', ' ')),
+            content: Text('verification_submitted'.i18n),
             backgroundColor: colorScheme.tertiary,
           ),
         );
@@ -123,7 +123,7 @@ class _IdentityVerificationScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('error_submitting'.i18n.replaceAll('_', ' ')),
+            content: Text('error_submitting'.i18n),
             backgroundColor: colorScheme.error,
           ),
         );
@@ -163,7 +163,7 @@ class _IdentityVerificationScreenState
       backgroundColor: colorScheme.surfaceContainerHighest,
       appBar: AppBar(
         title: Text(
-          'identity_verification'.i18n.replaceAll('_', ' '),
+          'identity_verification'.i18n,
           style: TextStyle(color: colorScheme.onSurface),
         ),
         centerTitle: true,
@@ -221,10 +221,7 @@ class _IdentityVerificationScreenState
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'unlock_professional_growth'.i18n.replaceAll(
-                            '_',
-                            ' ',
-                          ),
+                          'unlock_professional_growth'.i18n,
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -233,7 +230,7 @@ class _IdentityVerificationScreenState
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'verification_benefits'.i18n.replaceAll('_', ' '),
+                          'verification_benefits'.i18n,
                           style: TextStyle(
                             fontSize: 14,
                             color: colorScheme.onPrimary.withOpacity(0.9),
@@ -255,7 +252,7 @@ class _IdentityVerificationScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'personal_information'.i18n.replaceAll('_', ' '),
+                          'personal_information'.i18n,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -266,10 +263,7 @@ class _IdentityVerificationScreenState
                         ReactiveTextField<String>(
                           formControlName: 'fullName',
                           decoration: InputDecoration(
-                            labelText: 'full_legal_name'.i18n.replaceAll(
-                              '_',
-                              ' ',
-                            ),
+                            labelText: 'full_legal_name'.i18n,
                             labelStyle: TextStyle(
                               color: colorScheme.onSurfaceVariant,
                             ),
@@ -431,7 +425,7 @@ class _IdentityVerificationScreenState
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'alternative_documents'.i18n.replaceAll('_', ' '),
+                              'alternative_documents'.i18n,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -449,7 +443,7 @@ class _IdentityVerificationScreenState
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                'optional'.i18n.replaceAll('_', ' '),
+                                'optional'.i18n,
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: colorScheme.onSurfaceVariant,
@@ -481,10 +475,7 @@ class _IdentityVerificationScreenState
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'alternative_documents_note'.i18n.replaceAll(
-                            '_',
-                            ' ',
-                          ),
+                          'alternative_documents_note'.i18n,
                           style: TextStyle(
                             fontSize: 11,
                             color: colorScheme.onSurfaceVariant,
@@ -570,7 +561,7 @@ class _IdentityVerificationScreenState
               Icon(Icons.error_outline, size: 48, color: colorScheme.error),
               const SizedBox(height: 16),
               Text(
-                'error_loading'.i18n.replaceAll('_', ' '),
+                'error_loading'.i18n,
                 style: TextStyle(color: colorScheme.onSurface),
               ),
               const SizedBox(height: 16),

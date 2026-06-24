@@ -9,7 +9,20 @@ class AuthSupabaseDatasource {
     required String email,
     required String password,
   }) async {
-    return await _client.auth.signUp(email: email, password: password);
+    try {
+      print('[+] Attempting to sign up user with email: $email');
+      var response = await _client.auth.signUp(
+        email: email,
+        password: password,
+        emailRedirectTo: 'com.example.hirfati://login-callback/',
+      );
+      print('[+] Sign up successful for email: $email');
+      print('[+] AuthResponse: ${response.toString()}');
+      return response;
+    } catch (e) {
+      print('[-] Error occurred during sign up: $e');
+      rethrow;
+    }
   }
 
   Future<AuthResponse> signIn({

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../translations.dart';
+import '../providers/help_support_provider.dart';
 
 class HelpSupportScreen extends ConsumerWidget {
   const HelpSupportScreen({super.key});
@@ -32,7 +33,7 @@ class HelpSupportScreen extends ConsumerWidget {
             title: 'FAQ'.i18n,
             subtitle: 'Frequently asked questions'.i18n,
             color: theme.colorScheme.primary,
-            onTap: () => context.push('/faq'),
+            onTap: () => {ref.refresh(faqsProvider), context.push('/faq')},
           ),
           const SizedBox(height: 16),
           _buildMenuItem(

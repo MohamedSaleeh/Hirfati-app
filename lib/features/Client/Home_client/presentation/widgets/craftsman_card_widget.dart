@@ -59,7 +59,7 @@ class CraftsmanCardWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        craftsman.profession ?? '',
+                        craftsman.profession!.i18n,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),

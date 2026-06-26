@@ -22,7 +22,7 @@ class AddWorkPhotoSection extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -50,10 +50,7 @@ class AddWorkPhotoSection extends StatelessWidget {
                 const SizedBox(width: 12),
                 const Text(
                   'Photos',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 const Spacer(),
                 TextButton.icon(
@@ -61,9 +58,7 @@ class AddWorkPhotoSection extends StatelessWidget {
                   icon: const Icon(Icons.add_a_photo, size: 18),
                   label: Text(
                     'add_photos'.i18n,
-                    style: TextStyle(
-                      color: theme.colorScheme.primary,
-                    ),
+                    style: TextStyle(color: theme.colorScheme.primary),
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: theme.colorScheme.primary,
@@ -77,10 +72,7 @@ class AddWorkPhotoSection extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: images.isEmpty
                 ? const AddWorkEmptyPhotos()
-                : AddWorkPhotoGrid(
-                    images: images,
-                    onRemove: onRemovePhoto,
-                  ),
+                : AddWorkPhotoGrid(images: images, onRemove: onRemovePhoto),
           ),
         ],
       ),

@@ -6,17 +6,26 @@ class AddWorkEmptyPhotos extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       height: 120,
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200, style: BorderStyle.solid),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          style: BorderStyle.solid,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.photo_library_outlined, size: 48, color: Colors.grey.shade400),
+          Icon(
+            Icons.photo_library_outlined,
+            size: 48,
+            color: Colors.grey.shade400,
+          ),
           const SizedBox(height: 12),
           Text(
             'no_photos_selected'.i18n,

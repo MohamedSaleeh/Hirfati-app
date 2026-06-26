@@ -22,6 +22,7 @@ The app uses a feature-first layered structure.
 Most features are organized under `lib/features/<feature>` or under grouped folders such as `lib/features/Client` and `lib/features/Worker`.
 
 Common feature layers:
+
 - `data`: Supabase datasources, repository implementations, and data providers.
 - `domain`: models and repository interfaces.
 - `presentation`: screens, widgets, and UI state providers/controllers.
@@ -31,6 +32,7 @@ Some features also contain `application` folders, but their role is not clearly 
 ## State Management
 
 State management uses Riverpod. Existing code uses:
+
 - `Provider`
 - `StateProvider`
 - `NotifierProvider`

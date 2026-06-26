@@ -36,13 +36,13 @@ class _WorkGalleryScreenState extends ConsumerState<WorkGalleryScreen> {
   Widget build(BuildContext context) {
     final itemsAsync = ref.watch(workGalleryProvider);
     final categoriesAsync = ref.watch(workCategoriesProvider);
-
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('work_gallery'.i18n),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -86,7 +86,7 @@ class _WorkGalleryScreenState extends ConsumerState<WorkGalleryScreen> {
                 margin: const EdgeInsets.all(20),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(

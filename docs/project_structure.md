@@ -22,6 +22,7 @@
 Features live under `lib/features`.
 
 Top-level feature groups include:
+
 - `auth`
 - `chat`
 - `Client`
@@ -34,6 +35,7 @@ Top-level feature groups include:
 - `costom_arch`
 
 Many feature folders follow this shape:
+
 - `data/datasources`
 - `data/providers`
 - `data/repositories`

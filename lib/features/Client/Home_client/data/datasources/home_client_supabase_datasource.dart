@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/utils/distance_utils.dart';
+import '../../../../../translations.dart';
 import '../../domain_models/category_model.dart';
 import '../../domain_models/craftsman_model.dart';
 

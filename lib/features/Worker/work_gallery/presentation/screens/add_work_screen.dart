@@ -119,14 +119,14 @@ class _AddWorkScreenState extends ConsumerState<AddWorkScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'add new work'.i18n,
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
@@ -137,7 +137,7 @@ class _AddWorkScreenState extends ConsumerState<AddWorkScreen> {
             onPressed: _isSubmitting ? null : _submit,
             style: TextButton.styleFrom(
               backgroundColor: theme.colorScheme.primary,
-              foregroundColor: Colors.white,
+              foregroundColor: theme.colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -177,11 +177,18 @@ class _AddWorkScreenState extends ConsumerState<AddWorkScreen> {
                       title: 'work title'.i18n,
                       child: ReactiveTextField<String>(
                         formControlName: 'title',
+
                         decoration: InputDecoration(
                           hintText: 'e.g., Modern Kitchen Renovation',
-                          border: InputBorder.none,
+
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                           contentPadding: const EdgeInsets.all(16),
                         ),
                         validationMessages: {
@@ -201,9 +208,14 @@ class _AddWorkScreenState extends ConsumerState<AddWorkScreen> {
                         maxLines: 4,
                         decoration: InputDecoration(
                           hintText: 'tell us about your work'.i18n,
-                          border: InputBorder.none,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: theme.colorScheme.primary.withValues(
+                            alpha: 0.3,
+                          ),
                           contentPadding: const EdgeInsets.all(16),
                         ),
                         validationMessages: {

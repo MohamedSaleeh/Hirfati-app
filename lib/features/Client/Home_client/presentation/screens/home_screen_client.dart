@@ -105,6 +105,7 @@ class _HomeScreenClientState extends ConsumerState<HomeScreenClient> {
                           HomeSearchBar(searchControl: _searchControl),
                           const SizedBox(height: 24),
                           CategoriesSection(
+                            ref: ref,
                             categories: state.categories,
                             selectedCategoryId: state.selectedCategoryId,
                             showAll: _showAllCategories,

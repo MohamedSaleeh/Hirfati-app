@@ -22,13 +22,13 @@ class ActiveJobCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isInProgress = order.status == OrderStatus.in_progress;
-
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -131,15 +131,20 @@ class ActiveJobCard extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: isInProgress
-                        ? Colors.blue.shade50
-                        : Colors.orange.shade50,
+                        // ? Colors.blue.shade50
+                        ? theme.canvasColor
+                        // : Colors.orange.shade50,
+                        : theme.disabledColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     isInProgress ? 'in_progress'.i18n : 'accepted'.i18n,
                     style: TextStyle(
                       fontSize: 10,
-                      color: isInProgress ? Colors.blue : Colors.orange,
+                      // color: isInProgress ? Colors.blue : Colors.orange,
+                      color: isInProgress
+                          ? theme.primaryColor
+                          : theme.hintColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

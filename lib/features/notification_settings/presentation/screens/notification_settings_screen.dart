@@ -33,11 +33,12 @@ class NotificationSettingsScreen extends ConsumerWidget {
             children: [
               _buildSection(
                 context: context,
-                title: 'Notification Channels',
+                title: 'Notification Channels'.i18n,
                 children: [
                   SettingsSwitchTile(
-                    title: 'Push Notifications',
-                    subtitle: 'Receive instant notifications on your device',
+                    title: 'Push Notifications'.i18n,
+                    subtitle:
+                        'Receive instant notifications on your device'.i18n,
                     value: settings.pushEnabled,
                     onChanged: (value) {
                       ref
@@ -46,8 +47,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
                     },
                   ),
                   SettingsSwitchTile(
-                    title: 'Email Notifications',
-                    subtitle: 'Receive updates via email',
+                    title: 'Email Notifications'.i18n,
+                    subtitle: 'Receive updates via email'.i18n,
                     value: settings.emailEnabled,
                     onChanged: (value) {
                       ref
@@ -56,8 +57,8 @@ class NotificationSettingsScreen extends ConsumerWidget {
                     },
                   ),
                   SettingsSwitchTile(
-                    title: 'SMS Notifications',
-                    subtitle: 'Receive text message alerts',
+                    title: 'SMS Notifications'.i18n,
+                    subtitle: 'Receive text message alerts'.i18n,
                     value: settings.smsEnabled,
                     onChanged: (value) {
                       ref
@@ -70,10 +71,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               _buildSection(
                 context: context,
-                title: 'Order Notifications',
+                title: 'Order Notifications'.i18n,
                 children: [
                   SettingsSwitchTile(
-                    title: 'Order Confirmation',
+                    title: 'Order Confirmation'.i18n,
                     value: settings.orderConfirmation,
                     onChanged: (value) {
                       ref
@@ -82,7 +83,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                     },
                   ),
                   SettingsSwitchTile(
-                    title: 'Order Status Updates',
+                    title: 'Order Status Updates'.i18n,
                     value: settings.orderStatus,
                     onChanged: (value) {
                       ref
@@ -95,10 +96,10 @@ class NotificationSettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               _buildSection(
                 context: context,
-                title: 'Promotional Notifications',
+                title: 'Promotional Notifications'.i18n,
                 children: [
                   SettingsSwitchTile(
-                    title: 'Special Offers & Promotions',
+                    title: 'Special Offers & Promotions'.i18n,
                     value: settings.promotions,
                     onChanged: (value) {
                       ref

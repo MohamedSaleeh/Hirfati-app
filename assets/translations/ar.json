@@ -678,5 +678,14 @@
   "password requirements": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
   "experience_years": "سنوات الخبرة",
   "Forgot Password?": "نسيت كلمة المرور؟",
-  "No portfolio items yet": "لا توجد أعمال في المعرض بعد"
+  "No portfolio items yet": "لا توجد أعمال في المعرض بعد",
+  "Plumbing": "السباكة",
+  "Electrical": "الكهرباء",
+  "Wood": "الخشب",
+  "Painting": "الدهان",
+  "Cleaning": "التنظيف",
+  "AC Repair": "إصلاح المكيفات",
+  "Carpentry": "النجارة",
+  "Blacksmith": "الحدادة",
+  "Air Conditioning": " تكييف الهواء"
 }

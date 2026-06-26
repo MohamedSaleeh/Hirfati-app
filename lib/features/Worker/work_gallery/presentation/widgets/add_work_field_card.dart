@@ -17,9 +17,9 @@ class AddWorkFieldCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      width: double.infinity, 
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -55,10 +55,7 @@ class AddWorkFieldCard extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: child,
-          ),
+          Padding(padding: const EdgeInsets.all(16), child: child),
         ],
       ),
     );

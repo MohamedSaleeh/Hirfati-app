@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/models/faq_model.dart';
@@ -9,14 +10,18 @@ class HelpSupportSupabaseDatasource {
   HelpSupportSupabaseDatasource(this._client);
 
   Future<List<FaqModel>> getFaqs() async {
+    SharedPreferences languagePrefs = await SharedPreferences.getInstance();
+    final language = languagePrefs.getString('language');
+    print(
+      '\n*****************the language is $language\n***************************',
+    );
     final response = await _client
         .from('faqs')
         .select()
+        .eq('language', language!)
         .order('order', ascending: true);
 
-    return (response as List)
-        .map((json) => FaqModel.fromJson(json))
-        .toList();
+    return (response as List).map((json) => FaqModel.fromJson(json)).toList();
   }
 
   Future<void> sendSupportMessage({

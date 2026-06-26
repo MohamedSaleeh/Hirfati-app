@@ -7,6 +7,7 @@ Read this file before making any project change.
 This is a Flutter app named `hirfati`.
 
 The app uses:
+
 - `flutter_riverpod` for state management and dependency wiring.
 - `go_router` for routing in `lib/router.dart`.
 - `supabase_flutter` for backend data access.
@@ -35,6 +36,7 @@ The project is organized mainly by feature under `lib/features`, usually with `d
 ## Reference Docs
 
 Use these files for more detail:
+
 - `docs/architecture.md`
 - `docs/project_structure.md`
 - `docs/coding_standards.md`

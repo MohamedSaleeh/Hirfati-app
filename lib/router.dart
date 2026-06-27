@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'DashBoard/admin_dashboard.dart';
 import 'core/models/order.dart';
 import 'features/Client/Addresses/domain/models/address_model.dart';
 import 'features/Client/Addresses/presentation/screens/add_address_screen.dart';
@@ -46,9 +49,44 @@ import 'translations.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   var authStatus = ref.watch(authControllerProvider);
   return GoRouter(
-    // initialLocation: kIsWeb ? "/admin" : '/',
-    initialLocation: '/',
+    initialLocation: kIsWeb ? '/admin' : '/',
     redirect: (context, state) async {
+      final currentRoute = state.matchedLocation;
+
+      if (kIsWeb) {
+        if (currentRoute == "/forgot-password" ||
+            currentRoute == "/reset-password") {
+          return null;
+        }
+
+        if (authStatus.isLoading) {
+          return currentRoute == "/splash" ? null : "/splash";
+        }
+
+        final isAuthenticated = authStatus.when(
+          data: (status) => status == AuthStatus.authenticated,
+          loading: () => false,
+          error: (error, stackTrace) => false,
+        );
+
+        if (!isAuthenticated) {
+          return currentRoute == "/auth" ? null : "/auth";
+        }
+
+        try {
+          final isAdmin = await _currentWebUserIsAdmin();
+          if (!isAdmin) return currentRoute == '/admin' ? null : '/admin';
+        } catch (_) {
+          return currentRoute == '/admin' ? null : '/admin';
+        }
+
+        return currentRoute == '/admin' ? null : '/admin';
+      }
+
+      if (currentRoute == '/admin') {
+        return '/';
+      }
+
       if (authStatus.isLoading) {
         return "/splash";
       }
@@ -59,8 +97,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         error: (error, stackTrace) => false,
       );
 
-      final currentRoute = state.matchedLocation;
-
       final isAuthRoute = currentRoute == "/auth";
       final isProfileSetupRoute = currentRoute == "/profile-setup";
 
@@ -68,9 +104,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       //   return null;
       // }
 
-      if (currentRoute == "/forgot-password" || currentRoute == "/reset-password") {
-    return null;
-  }
+      if (currentRoute == "/forgot-password" ||
+          currentRoute == "/reset-password") {
+        return null;
+      }
 
       if (!isAuthenticated) {
         if (ref.read(clientNavigationProvider) != 0) {
@@ -151,9 +188,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin',
         name: 'admin',
-        builder: (context, state) => Scaffold(
-          body: Center(child: Text('Admin Panel - Under Construction'.i18n)),
-        ),
+        builder: (context, state) => const AdminDashboard(),
       ),
       GoRoute(
         path: '/',
@@ -243,7 +278,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'payment-methods',
         builder: (context, state) => const PaymentMethodsScreen(),
       ),
-
       GoRoute(
         path: '/add-payment-method',
         name: 'add-payment-method',
@@ -373,7 +407,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           return ReviewScreen(order: order);
         },
       ),
-
       GoRoute(
         path: '/payment-success',
         name: 'payment-success',
@@ -391,8 +424,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
-
-
       GoRoute(
         path: '/client/workers/:workerId',
         builder: (context, state) {
@@ -400,8 +431,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           return WorkerProfileDetailsScreen(workerId: workerId);
         },
       ),
-
-
       GoRoute(
         path: '/forgot-password',
         name: 'forgot-password',
@@ -418,3 +447,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+Future<bool> _currentWebUserIsAdmin() async {
+  final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) return false;
+
+  final profile = await Supabase.instance.client
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle();
+
+  return profile?['role']?.toString().toLowerCase() == 'admin';
+}

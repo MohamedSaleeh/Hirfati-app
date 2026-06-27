@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,15 +15,37 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Localization.loadArabicFromJson();
-
-  await Firebase.initializeApp();
-
   try {
     await dotenv.load(fileName: ".env");
-  } catch (e) {
-    print('Warning: Could not load .env file: $e');
+    debugPrint(".env loaded successfully");
+  } catch (e, st) {
+    debugPrint("Failed to load .env: $e");
+    debugPrintStack(stackTrace: st);
+    rethrow;
   }
+
+  final firebaseApiKey = dotenv.env['FIREBASE_API_KEY'];
+  final firebaseAppId = dotenv.env['FIREBASE_APP_ID'];
+  final firebaseMessagingSenderId = dotenv.env['FIREBASE_MESSAGING_SENDER_ID'];
+  final firebaseProjectId = dotenv.env['FIREBASE_PROJECT_ID'];
+
+  if (firebaseApiKey == null ||
+      firebaseAppId == null ||
+      firebaseMessagingSenderId == null ||
+      firebaseProjectId == null) {
+    throw Exception('Missing Firebase values in .env file');
+  }
+
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+      apiKey: firebaseApiKey,
+      appId: firebaseAppId,
+      messagingSenderId: firebaseMessagingSenderId,
+      projectId: firebaseProjectId,
+    ),
+  );
+
+  await Localization.loadArabicFromJson();
 
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
   final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
@@ -33,8 +56,13 @@ Future<void> main(List<String> args) async {
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
-  await NotificationService.initialize();
-  runApp(ProviderScope(child: I18n(autoSaveLocale: true, child: MyApp())));
+  if (!kIsWeb) {
+    await NotificationService.initialize();
+  }
+
+  runApp(
+    ProviderScope(child: I18n(autoSaveLocale: true, child: const MyApp())),
+  );
 }
 
 class MyApp extends ConsumerWidget {
@@ -48,7 +76,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      title: 'WAQF',
+      title: 'Hirfati',
       theme: AppTheme.light.copyWith(),
       darkTheme: AppTheme.dark,
       themeMode: themeModeAsync.when(

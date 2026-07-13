@@ -93,6 +93,15 @@ class WorkerProfileScreen extends ConsumerWidget {
                           ),
                           const Divider(height: 1, indent: 60),
                           WorkerProfileMenuItem(
+                            icon: Icons.account_balance_wallet_outlined,
+                            title: 'Wallet'.i18n,
+                            subtitle: 'Current balance and payments'.i18n,
+                            onTap: () {
+                              context.push('/wallet');
+                            },
+                          ),
+                          const Divider(height: 1, indent: 60),
+                          WorkerProfileMenuItem(
                             icon: Icons.category_outlined,
                             title: 'categories pricing'.i18n,
                             subtitle: 'service engagement price list'.i18n,

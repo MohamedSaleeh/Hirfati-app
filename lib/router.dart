@@ -44,6 +44,7 @@ import 'features/notification_settings/presentation/screens/notification_setting
 import 'features/notifications/presentation/screens/notifications_screen.dart';
 import 'features/payment/presentation/screens/payment_success_screen.dart';
 import 'features/review/presentation/screens/review_screen.dart';
+import 'features/wallet/presentation/screens/wallet_screen.dart';
 import 'translations.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -292,6 +293,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/notification-settings',
         name: 'notification-settings',
         builder: (context, state) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/wallet',
+        name: 'wallet',
+        builder: (context, state) => const WalletScreen(),
       ),
       GoRoute(
         path: '/help-support',

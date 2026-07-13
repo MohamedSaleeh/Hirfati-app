@@ -171,6 +171,13 @@ class _ClientProfileScreenState extends ConsumerState<ClientProfileScreen> {
                           enable: true,
                         ),
                         ProfileMenuItem(
+                          icon: Icons.account_balance_wallet_outlined,
+                          title: "Wallet".i18n,
+                          subtitle: "Current balance and payments".i18n,
+                          onTap: () => context.push('/wallet'),
+                          enable: true,
+                        ),
+                        ProfileMenuItem(
                           icon: Icons.notifications,
                           title: "notifications".i18n,
                           subtitle: "Push, Email, SMS",

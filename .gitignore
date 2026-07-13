@@ -96,6 +96,7 @@ migrate_working_dir/
 .env
 .env.*
 *.env
+!.env.example
 
 # ملف الخدمة لحساب Firebase (يمنع منعاً باتاً رفعه!)
 firebase-service-account.json

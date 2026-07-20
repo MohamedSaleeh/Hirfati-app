@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import '../../../../../translations.dart';
 import '../../../../notifications/presentation/providers/notifications_stream_provider.dart';
+import '../../domain_models/craftsman_model.dart';
 import '../providers/craftsmen_stream_provider.dart';
 import '../providers/home_client_provider.dart';
 import '../providers/search_craftsmen_provider.dart';
@@ -25,19 +28,26 @@ class _HomeScreenClientState extends ConsumerState<HomeScreenClient> {
   final _searchControl = FormControl<String>(value: '');
   String _searchQuery = '';
   bool _showAllCategories = false;
+  Timer? _searchDebounce;
+  StreamSubscription<String?>? _searchSubscription;
 
   @override
   void initState() {
     super.initState();
-    _searchControl.valueChanges.listen((value) {
-      if (mounted) {
-        setState(() => _searchQuery = value ?? '');
-      }
+    _searchSubscription = _searchControl.valueChanges.listen((value) {
+      _searchDebounce?.cancel();
+      _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+        if (mounted) {
+          setState(() => _searchQuery = value ?? '');
+        }
+      });
     });
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchSubscription?.cancel();
     _searchControl.dispose();
     super.dispose();
   }
@@ -67,7 +77,7 @@ class _HomeScreenClientState extends ConsumerState<HomeScreenClient> {
             children: [
               Icon(Icons.error_outline, size: 48, color: colorScheme.error),
               const SizedBox(height: 12),
-              Text(error.toString().i18n),
+              Text('Unable to load home data'.i18n),
               const SizedBox(height: 16),
               FilledButton(
                 onPressed: () => ref.refresh(homeClientProvider),
@@ -105,7 +115,6 @@ class _HomeScreenClientState extends ConsumerState<HomeScreenClient> {
                           HomeSearchBar(searchControl: _searchControl),
                           const SizedBox(height: 24),
                           CategoriesSection(
-                            ref: ref,
                             categories: state.categories,
                             selectedCategoryId: state.selectedCategoryId,
                             showAll: _showAllCategories,
@@ -158,7 +167,7 @@ class _HomeScreenClientState extends ConsumerState<HomeScreenClient> {
 }
 
 class _SearchResults extends StatelessWidget {
-  final AsyncValue<List> searchAsync;
+  final AsyncValue<List<CraftsmanModel>> searchAsync;
 
   const _SearchResults({required this.searchAsync});
 
@@ -180,7 +189,10 @@ class _SearchResults extends StatelessWidget {
         ),
       ),
       error: (e, _) => Center(
-        child: Text(e.toString(), style: TextStyle(color: colorScheme.error)),
+        child: Text(
+          'Unable to search craftsmen'.i18n,
+          style: TextStyle(color: colorScheme.error),
+        ),
       ),
       data: (results) {
         if (results.isEmpty) {
@@ -214,7 +226,7 @@ class _SearchResults extends StatelessWidget {
               itemCount: results.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
               itemBuilder: (context, index) =>
-                  CraftsmanCardWidget(craftsman: results[index] as dynamic),
+                  CraftsmanCardWidget(craftsman: results[index]),
             ),
           ],
         );

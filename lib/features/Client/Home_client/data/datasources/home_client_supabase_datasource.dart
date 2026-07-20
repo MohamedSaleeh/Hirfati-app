@@ -1,7 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../core/utils/distance_utils.dart';
-import '../../../../../translations.dart';
 import '../../domain_models/category_model.dart';
 import '../../domain_models/craftsman_model.dart';
 
@@ -24,7 +23,17 @@ const _kWorkerSelect = '''
     longitude
   ),
   categories (
-    name
+    id,
+    name,
+    icon,
+    category_translations (
+      category_id,
+      locale,
+      name,
+      search_terms,
+      created_at,
+      updated_at
+    )
   ),
   services (
     id,
@@ -44,12 +53,29 @@ class HomeClientSupabaseDatasource {
   Future<List<CategoryModel>> fetchCategories() async {
     final response = await _client
         .from('categories')
-        .select('id, name, icon')
+        .select('''
+          id,
+          name,
+          icon,
+          created_at,
+          category_translations (
+            category_id,
+            locale,
+            name,
+            search_terms,
+            created_at,
+            updated_at
+          )
+        ''')
         .order('name');
 
-    return (response as List<dynamic>)
-        .map((e) => CategoryModel.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
+    final categories = <CategoryModel>[];
+    for (final row in response) {
+      categories.add(
+        CategoryModel.fromSupabaseRow(Map<String, dynamic>.from(row)),
+      );
+    }
+    return categories;
   }
 
   // --------------------------------------------------
@@ -150,8 +176,8 @@ class HomeClientSupabaseDatasource {
     final currentClientUserId = _client.auth.currentUser?.id;
     final currentClientLocation = await _getClientLocation(currentClientUserId);
 
-    for (var json in response as List<dynamic>) {
-      final map = Map<String, dynamic>.from(json as Map);
+    for (var json in response) {
+      final map = Map<String, dynamic>.from(json);
       if (map['profiles'] == null) continue;
 
       final craftsman = CraftsmanModel.fromWorkerRow(map);
@@ -186,21 +212,36 @@ class HomeClientSupabaseDatasource {
   // deduplicates by worker id.
   // --------------------------------------------------
   Future<List<CraftsmanModel>> searchCraftsmen(String query) async {
-    if (query.trim().isEmpty) return fetchRecommendedCraftsmen();
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) return fetchRecommendedCraftsmen();
+
+    final idResponse = await _client.rpc(
+      'search_approved_worker_ids',
+      params: {'search_query': trimmedQuery},
+    );
+
+    final workerIds = <String>{};
+    if (idResponse is List) {
+      for (final row in idResponse) {
+        if (row is Map) {
+          final workerId = row['worker_id']?.toString();
+          if (workerId != null && workerId.isNotEmpty) {
+            workerIds.add(workerId);
+          }
+        }
+      }
+    }
+
+    if (workerIds.isEmpty) return const <CraftsmanModel>[];
 
     final response = await _client
         .from('workers')
         .select(_kWorkerSelect)
         .eq('approved', true)
-        .limit(100);
+        .inFilter('id', workerIds.toList())
+        .order('rating_average', ascending: false);
 
-    final all = _mapWorkerRows(response as List<dynamic>);
-    final lq = query.toLowerCase();
-
-    return all.where((c) {
-      return (c.name.toLowerCase().contains(lq)) ||
-          (c.profession?.toLowerCase().contains(lq) ?? false);
-    }).toList();
+    return _mapWorkerRows(response);
   }
 
   // --------------------------------------------------
@@ -213,7 +254,7 @@ class HomeClientSupabaseDatasource {
         .eq('approved', true)
         .limit(30);
 
-    return _mapWorkerRows(response as List<dynamic>)
+    return _mapWorkerRows(response)
         .where((c) {
           return c.latitude != null && c.longitude != null;
         })
@@ -246,7 +287,8 @@ class HomeClientSupabaseDatasource {
   List<CraftsmanModel> _mapWorkerRows(List<dynamic> rows) {
     final result = <CraftsmanModel>[];
     for (final row in rows) {
-      final map = Map<String, dynamic>.from(row as Map);
+      if (row is! Map) continue;
+      final map = Map<String, dynamic>.from(row);
       if (map['profiles'] == null) continue;
 
       result.add(CraftsmanModel.fromWorkerRow(map));

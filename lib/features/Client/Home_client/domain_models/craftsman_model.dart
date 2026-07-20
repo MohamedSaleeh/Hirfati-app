@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'category_model.dart';
+
 part 'craftsman_model.freezed.dart';
 part 'craftsman_model.g.dart';
 
@@ -18,6 +20,9 @@ abstract class CraftsmanModel with _$CraftsmanModel {
 
     /// workers.category_id (mapped to services/category selection)
     String? categoryId,
+
+    /// Joined category data, including available translations.
+    CategoryModel? category,
 
     /// profiles.full_name
     required String name,
@@ -61,20 +66,34 @@ abstract class CraftsmanModel with _$CraftsmanModel {
       _$CraftsmanModelFromJson(json);
 
   factory CraftsmanModel.fromWorkerRow(Map<String, dynamic> row) {
-    final profile = (row['profiles'] as Map<String, dynamic>?) ?? {};
-    final category = (row['categories'] as Map<String, dynamic>?) ?? {};
-    final services = (row['services'] as List?) ?? [];
+    final profile = row['profiles'] is Map
+        ? Map<String, dynamic>.from(row['profiles'] as Map)
+        : <String, dynamic>{};
+    final categoryMap = row['categories'] is Map
+        ? Map<String, dynamic>.from(row['categories'] as Map)
+        : null;
+    final category = categoryMap == null
+        ? null
+        : CategoryModel.fromSupabaseRow({
+            ...categoryMap,
+            'id': categoryMap['id'] ?? row['category_id'],
+          });
+    final services = row['services'] is List
+        ? row['services'] as List
+        : const [];
 
     // جلب جميع الخدمات
-    final serviceList = services
-        .map((s) => Map<String, dynamic>.from(s as Map))
-        .toList();
+    final serviceList = <Map<String, dynamic>>[];
+    for (final service in services) {
+      if (service is Map) {
+        serviceList.add(Map<String, dynamic>.from(service));
+      }
+    }
     final hasServices = serviceList.isNotEmpty;
 
     // حساب أقل سعر للخدمات
     double minServicePrice = 0.0;
     String? firstServiceId;
-    String? firstServiceName;
 
     if (serviceList.isNotEmpty) {
       // أقل سعر
@@ -85,8 +104,7 @@ abstract class CraftsmanModel with _$CraftsmanModel {
 
       // أول خدمة (للعرض الافتراضي)
       final firstService = serviceList.first;
-      firstServiceId = firstService['id'] as String?;
-      firstServiceName = firstService['title'] as String?;
+      firstServiceId = firstService['id']?.toString();
     }
 
     final rating = (row['rating_average'] as num?)?.toDouble() ?? 0.0;
@@ -100,12 +118,13 @@ abstract class CraftsmanModel with _$CraftsmanModel {
     print("AVATAR URL: ${profile['avatar_url']}");
 
     return CraftsmanModel(
-      id: row['id'] as String? ?? '',
+      id: row['id']?.toString() ?? '',
       serviceId: firstServiceId,
       categoryId: row['category_id']?.toString(),
-      name: profile['full_name'] as String? ?? '',
-      avatarUrl: profile['avatar_url'] as String?,
-      profession: firstServiceName ?? category['name'] as String?,
+      category: category,
+      name: profile['full_name']?.toString() ?? '',
+      avatarUrl: profile['avatar_url']?.toString(),
+      profession: category?.name,
       rating: rating,
       hourlyPrice: hourlyRate,
       minServicePrice: minServicePrice,
@@ -113,7 +132,7 @@ abstract class CraftsmanModel with _$CraftsmanModel {
       isNew: rating == 0.0,
       latitude: (profile['latitude'] as num?)?.toDouble(),
       longitude: (profile['longitude'] as num?)?.toDouble(),
-      city: profile['city'] as String?,
+      city: profile['city']?.toString(),
     );
   }
 }

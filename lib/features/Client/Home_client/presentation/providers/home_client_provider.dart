@@ -17,8 +17,13 @@ class HomeClientNotifier extends AsyncNotifier<HomeClientState> {
   }
 
   Future<void> refresh() async {
+    final selectedCategoryId = state is AsyncData<HomeClientState>
+        ? (state as AsyncData<HomeClientState>).value.selectedCategoryId
+        : null;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(_load);
+    state = await AsyncValue.guard(
+      () => _load(selectedCategoryId: selectedCategoryId),
+    );
   }
 
   Future<void> selectCategory(String? categoryId) async {
@@ -48,7 +53,7 @@ class HomeClientNotifier extends AsyncNotifier<HomeClientState> {
     }
   }
 
-  Future<HomeClientState> _load() async {
+  Future<HomeClientState> _load({String? selectedCategoryId}) async {
     final repo = ref.read(homeClientRepositoryProvider);
 
     final results = await Future.wait([
@@ -60,11 +65,17 @@ class HomeClientNotifier extends AsyncNotifier<HomeClientState> {
     final categories = results[0] as List<CategoryModel>;
     final craftsmen = results[1] as List<CraftsmanModel>;
     final userCity = results[2] as String?;
+    final filteredCraftsmen = selectedCategoryId == null
+        ? craftsmen
+        : craftsmen
+              .where((craftsman) => craftsman.categoryId == selectedCategoryId)
+              .toList();
 
     return HomeClientState(
       categories: categories,
       recommendedCraftsmen: craftsmen,
-      filteredCraftsmen: craftsmen,
+      filteredCraftsmen: filteredCraftsmen,
+      selectedCategoryId: selectedCategoryId,
       userCity: userCity,
     );
   }

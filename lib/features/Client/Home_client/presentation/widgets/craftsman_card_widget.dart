@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../../../core/presentation/providers/language_provider.dart';
 import '../../../../../translations.dart';
+import '../../domain_models/category_model.dart';
 import '../../domain_models/craftsman_model.dart';
 
-class CraftsmanCardWidget extends StatelessWidget {
+class CraftsmanCardWidget extends ConsumerWidget {
   final CraftsmanModel craftsman;
 
   const CraftsmanCardWidget({super.key, required this.craftsman});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final language = ref.watch(language_provider);
+    final professionLabel = craftsman.category == null
+        ? craftsman.profession ?? ''
+        : resolveCategoryDisplayName(craftsman.category!, language);
 
     return Container(
       decoration: BoxDecoration(
@@ -34,9 +42,9 @@ class CraftsmanCardWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 InkWell(
-                  child: _CraftsmanAvatar(avatarUrl: craftsman.avatarUrl),
                   onTap: () => context.push('/client/workers/${craftsman.id}'),
                   mouseCursor: SystemMouseCursors.click,
+                  child: _CraftsmanAvatar(avatarUrl: craftsman.avatarUrl),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -59,7 +67,7 @@ class CraftsmanCardWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        craftsman.profession!.i18n,
+                        professionLabel,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -214,7 +222,7 @@ class CraftsmanCardWidget extends StatelessWidget {
                       extra: {
                         'workerId': craftsman.id,
                         'serviceId': craftsman.serviceId ?? '',
-                        'serviceName': craftsman.profession ?? '',
+                        'serviceName': professionLabel,
                         'estimatedPrice': craftsman.hasServices
                             ? craftsman.minServicePrice
                             : craftsman.hourlyPrice,

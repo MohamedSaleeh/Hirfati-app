@@ -11,6 +11,9 @@ _CraftsmanModel _$CraftsmanModelFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       serviceId: json['serviceId'] as String?,
       categoryId: json['categoryId'] as String?,
+      category: json['category'] == null
+          ? null
+          : CategoryModel.fromJson(json['category'] as Map<String, dynamic>),
       name: json['name'] as String,
       avatarUrl: json['avatarUrl'] as String?,
       profession: json['profession'] as String?,
@@ -30,6 +33,7 @@ Map<String, dynamic> _$CraftsmanModelToJson(_CraftsmanModel instance) =>
       'id': instance.id,
       'serviceId': instance.serviceId,
       'categoryId': instance.categoryId,
+      'category': instance.category,
       'name': instance.name,
       'avatarUrl': instance.avatarUrl,
       'profession': instance.profession,

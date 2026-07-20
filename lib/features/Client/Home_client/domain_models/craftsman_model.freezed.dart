@@ -18,7 +18,8 @@ mixin _$CraftsmanModel {
 /// workers.id
  String get id;/// services.id - the first/default service for this worker
  String? get serviceId;/// workers.category_id (mapped to services/category selection)
- String? get categoryId;/// profiles.full_name
+ String? get categoryId;/// Joined category data, including available translations.
+ CategoryModel? get category;/// profiles.full_name
  String get name;/// profiles.avatar_url
  String? get avatarUrl;/// categories.name  →  profession label shown in UI
  String? get profession;/// workers.rating_average
@@ -43,16 +44,16 @@ $CraftsmanModelCopyWith<CraftsmanModel> get copyWith => _$CraftsmanModelCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CraftsmanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.serviceId, serviceId) || other.serviceId == serviceId)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.name, name) || other.name == name)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.profession, profession) || other.profession == profession)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.distance, distance) || other.distance == distance)&&(identical(other.hourlyPrice, hourlyPrice) || other.hourlyPrice == hourlyPrice)&&(identical(other.minServicePrice, minServicePrice) || other.minServicePrice == minServicePrice)&&(identical(other.hasServices, hasServices) || other.hasServices == hasServices)&&(identical(other.isNew, isNew) || other.isNew == isNew)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.city, city) || other.city == city));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CraftsmanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.serviceId, serviceId) || other.serviceId == serviceId)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.category, category) || other.category == category)&&(identical(other.name, name) || other.name == name)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.profession, profession) || other.profession == profession)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.distance, distance) || other.distance == distance)&&(identical(other.hourlyPrice, hourlyPrice) || other.hourlyPrice == hourlyPrice)&&(identical(other.minServicePrice, minServicePrice) || other.minServicePrice == minServicePrice)&&(identical(other.hasServices, hasServices) || other.hasServices == hasServices)&&(identical(other.isNew, isNew) || other.isNew == isNew)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.city, city) || other.city == city));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,serviceId,categoryId,name,avatarUrl,profession,rating,distance,hourlyPrice,minServicePrice,hasServices,isNew,latitude,longitude,city);
+int get hashCode => Object.hash(runtimeType,id,serviceId,categoryId,category,name,avatarUrl,profession,rating,distance,hourlyPrice,minServicePrice,hasServices,isNew,latitude,longitude,city);
 
 @override
 String toString() {
-  return 'CraftsmanModel(id: $id, serviceId: $serviceId, categoryId: $categoryId, name: $name, avatarUrl: $avatarUrl, profession: $profession, rating: $rating, distance: $distance, hourlyPrice: $hourlyPrice, minServicePrice: $minServicePrice, hasServices: $hasServices, isNew: $isNew, latitude: $latitude, longitude: $longitude, city: $city)';
+  return 'CraftsmanModel(id: $id, serviceId: $serviceId, categoryId: $categoryId, category: $category, name: $name, avatarUrl: $avatarUrl, profession: $profession, rating: $rating, distance: $distance, hourlyPrice: $hourlyPrice, minServicePrice: $minServicePrice, hasServices: $hasServices, isNew: $isNew, latitude: $latitude, longitude: $longitude, city: $city)';
 }
 
 
@@ -63,11 +64,11 @@ abstract mixin class $CraftsmanModelCopyWith<$Res>  {
   factory $CraftsmanModelCopyWith(CraftsmanModel value, $Res Function(CraftsmanModel) _then) = _$CraftsmanModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String? serviceId, String? categoryId, String name, String? avatarUrl, String? profession, double rating, double distance, double hourlyPrice, double minServicePrice, bool hasServices, bool isNew, double? latitude, double? longitude, String? city
+ String id, String? serviceId, String? categoryId, CategoryModel? category, String name, String? avatarUrl, String? profession, double rating, double distance, double hourlyPrice, double minServicePrice, bool hasServices, bool isNew, double? latitude, double? longitude, String? city
 });
 
 
-
+$CategoryModelCopyWith<$Res>? get category;
 
 }
 /// @nodoc
@@ -80,12 +81,13 @@ class _$CraftsmanModelCopyWithImpl<$Res>
 
 /// Create a copy of CraftsmanModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? serviceId = freezed,Object? categoryId = freezed,Object? name = null,Object? avatarUrl = freezed,Object? profession = freezed,Object? rating = null,Object? distance = null,Object? hourlyPrice = null,Object? minServicePrice = null,Object? hasServices = null,Object? isNew = null,Object? latitude = freezed,Object? longitude = freezed,Object? city = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? serviceId = freezed,Object? categoryId = freezed,Object? category = freezed,Object? name = null,Object? avatarUrl = freezed,Object? profession = freezed,Object? rating = null,Object? distance = null,Object? hourlyPrice = null,Object? minServicePrice = null,Object? hasServices = null,Object? isNew = null,Object? latitude = freezed,Object? longitude = freezed,Object? city = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,serviceId: freezed == serviceId ? _self.serviceId : serviceId // ignore: cast_nullable_to_non_nullable
 as String?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
-as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
+as CategoryModel?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,profession: freezed == profession ? _self.profession : profession // ignore: cast_nullable_to_non_nullable
 as String?,rating: null == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
@@ -100,7 +102,19 @@ as double?,city: freezed == city ? _self.city : city // ignore: cast_nullable_to
 as String?,
   ));
 }
+/// Create a copy of CraftsmanModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CategoryModelCopyWith<$Res>? get category {
+    if (_self.category == null) {
+    return null;
+  }
 
+  return $CategoryModelCopyWith<$Res>(_self.category!, (value) {
+    return _then(_self.copyWith(category: value));
+  });
+}
 }
 
 
@@ -182,10 +196,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? serviceId,  String? categoryId,  String name,  String? avatarUrl,  String? profession,  double rating,  double distance,  double hourlyPrice,  double minServicePrice,  bool hasServices,  bool isNew,  double? latitude,  double? longitude,  String? city)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? serviceId,  String? categoryId,  CategoryModel? category,  String name,  String? avatarUrl,  String? profession,  double rating,  double distance,  double hourlyPrice,  double minServicePrice,  bool hasServices,  bool isNew,  double? latitude,  double? longitude,  String? city)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CraftsmanModel() when $default != null:
-return $default(_that.id,_that.serviceId,_that.categoryId,_that.name,_that.avatarUrl,_that.profession,_that.rating,_that.distance,_that.hourlyPrice,_that.minServicePrice,_that.hasServices,_that.isNew,_that.latitude,_that.longitude,_that.city);case _:
+return $default(_that.id,_that.serviceId,_that.categoryId,_that.category,_that.name,_that.avatarUrl,_that.profession,_that.rating,_that.distance,_that.hourlyPrice,_that.minServicePrice,_that.hasServices,_that.isNew,_that.latitude,_that.longitude,_that.city);case _:
   return orElse();
 
 }
@@ -203,10 +217,10 @@ return $default(_that.id,_that.serviceId,_that.categoryId,_that.name,_that.avata
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? serviceId,  String? categoryId,  String name,  String? avatarUrl,  String? profession,  double rating,  double distance,  double hourlyPrice,  double minServicePrice,  bool hasServices,  bool isNew,  double? latitude,  double? longitude,  String? city)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? serviceId,  String? categoryId,  CategoryModel? category,  String name,  String? avatarUrl,  String? profession,  double rating,  double distance,  double hourlyPrice,  double minServicePrice,  bool hasServices,  bool isNew,  double? latitude,  double? longitude,  String? city)  $default,) {final _that = this;
 switch (_that) {
 case _CraftsmanModel():
-return $default(_that.id,_that.serviceId,_that.categoryId,_that.name,_that.avatarUrl,_that.profession,_that.rating,_that.distance,_that.hourlyPrice,_that.minServicePrice,_that.hasServices,_that.isNew,_that.latitude,_that.longitude,_that.city);case _:
+return $default(_that.id,_that.serviceId,_that.categoryId,_that.category,_that.name,_that.avatarUrl,_that.profession,_that.rating,_that.distance,_that.hourlyPrice,_that.minServicePrice,_that.hasServices,_that.isNew,_that.latitude,_that.longitude,_that.city);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -223,10 +237,10 @@ return $default(_that.id,_that.serviceId,_that.categoryId,_that.name,_that.avata
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? serviceId,  String? categoryId,  String name,  String? avatarUrl,  String? profession,  double rating,  double distance,  double hourlyPrice,  double minServicePrice,  bool hasServices,  bool isNew,  double? latitude,  double? longitude,  String? city)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? serviceId,  String? categoryId,  CategoryModel? category,  String name,  String? avatarUrl,  String? profession,  double rating,  double distance,  double hourlyPrice,  double minServicePrice,  bool hasServices,  bool isNew,  double? latitude,  double? longitude,  String? city)?  $default,) {final _that = this;
 switch (_that) {
 case _CraftsmanModel() when $default != null:
-return $default(_that.id,_that.serviceId,_that.categoryId,_that.name,_that.avatarUrl,_that.profession,_that.rating,_that.distance,_that.hourlyPrice,_that.minServicePrice,_that.hasServices,_that.isNew,_that.latitude,_that.longitude,_that.city);case _:
+return $default(_that.id,_that.serviceId,_that.categoryId,_that.category,_that.name,_that.avatarUrl,_that.profession,_that.rating,_that.distance,_that.hourlyPrice,_that.minServicePrice,_that.hasServices,_that.isNew,_that.latitude,_that.longitude,_that.city);case _:
   return null;
 
 }
@@ -238,7 +252,7 @@ return $default(_that.id,_that.serviceId,_that.categoryId,_that.name,_that.avata
 @JsonSerializable()
 
 class _CraftsmanModel implements CraftsmanModel {
-  const _CraftsmanModel({required this.id, this.serviceId, this.categoryId, required this.name, this.avatarUrl, this.profession, this.rating = 0.0, this.distance = 0.0, this.hourlyPrice = 0.0, this.minServicePrice = 0.0, this.hasServices = false, this.isNew = false, this.latitude, this.longitude, this.city});
+  const _CraftsmanModel({required this.id, this.serviceId, this.categoryId, this.category, required this.name, this.avatarUrl, this.profession, this.rating = 0.0, this.distance = 0.0, this.hourlyPrice = 0.0, this.minServicePrice = 0.0, this.hasServices = false, this.isNew = false, this.latitude, this.longitude, this.city});
   factory _CraftsmanModel.fromJson(Map<String, dynamic> json) => _$CraftsmanModelFromJson(json);
 
 /// workers.id
@@ -247,6 +261,8 @@ class _CraftsmanModel implements CraftsmanModel {
 @override final  String? serviceId;
 /// workers.category_id (mapped to services/category selection)
 @override final  String? categoryId;
+/// Joined category data, including available translations.
+@override final  CategoryModel? category;
 /// profiles.full_name
 @override final  String name;
 /// profiles.avatar_url
@@ -285,16 +301,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CraftsmanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.serviceId, serviceId) || other.serviceId == serviceId)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.name, name) || other.name == name)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.profession, profession) || other.profession == profession)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.distance, distance) || other.distance == distance)&&(identical(other.hourlyPrice, hourlyPrice) || other.hourlyPrice == hourlyPrice)&&(identical(other.minServicePrice, minServicePrice) || other.minServicePrice == minServicePrice)&&(identical(other.hasServices, hasServices) || other.hasServices == hasServices)&&(identical(other.isNew, isNew) || other.isNew == isNew)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.city, city) || other.city == city));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CraftsmanModel&&(identical(other.id, id) || other.id == id)&&(identical(other.serviceId, serviceId) || other.serviceId == serviceId)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.category, category) || other.category == category)&&(identical(other.name, name) || other.name == name)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&(identical(other.profession, profession) || other.profession == profession)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.distance, distance) || other.distance == distance)&&(identical(other.hourlyPrice, hourlyPrice) || other.hourlyPrice == hourlyPrice)&&(identical(other.minServicePrice, minServicePrice) || other.minServicePrice == minServicePrice)&&(identical(other.hasServices, hasServices) || other.hasServices == hasServices)&&(identical(other.isNew, isNew) || other.isNew == isNew)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.city, city) || other.city == city));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,serviceId,categoryId,name,avatarUrl,profession,rating,distance,hourlyPrice,minServicePrice,hasServices,isNew,latitude,longitude,city);
+int get hashCode => Object.hash(runtimeType,id,serviceId,categoryId,category,name,avatarUrl,profession,rating,distance,hourlyPrice,minServicePrice,hasServices,isNew,latitude,longitude,city);
 
 @override
 String toString() {
-  return 'CraftsmanModel(id: $id, serviceId: $serviceId, categoryId: $categoryId, name: $name, avatarUrl: $avatarUrl, profession: $profession, rating: $rating, distance: $distance, hourlyPrice: $hourlyPrice, minServicePrice: $minServicePrice, hasServices: $hasServices, isNew: $isNew, latitude: $latitude, longitude: $longitude, city: $city)';
+  return 'CraftsmanModel(id: $id, serviceId: $serviceId, categoryId: $categoryId, category: $category, name: $name, avatarUrl: $avatarUrl, profession: $profession, rating: $rating, distance: $distance, hourlyPrice: $hourlyPrice, minServicePrice: $minServicePrice, hasServices: $hasServices, isNew: $isNew, latitude: $latitude, longitude: $longitude, city: $city)';
 }
 
 
@@ -305,11 +321,11 @@ abstract mixin class _$CraftsmanModelCopyWith<$Res> implements $CraftsmanModelCo
   factory _$CraftsmanModelCopyWith(_CraftsmanModel value, $Res Function(_CraftsmanModel) _then) = __$CraftsmanModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? serviceId, String? categoryId, String name, String? avatarUrl, String? profession, double rating, double distance, double hourlyPrice, double minServicePrice, bool hasServices, bool isNew, double? latitude, double? longitude, String? city
+ String id, String? serviceId, String? categoryId, CategoryModel? category, String name, String? avatarUrl, String? profession, double rating, double distance, double hourlyPrice, double minServicePrice, bool hasServices, bool isNew, double? latitude, double? longitude, String? city
 });
 
 
-
+@override $CategoryModelCopyWith<$Res>? get category;
 
 }
 /// @nodoc
@@ -322,12 +338,13 @@ class __$CraftsmanModelCopyWithImpl<$Res>
 
 /// Create a copy of CraftsmanModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? serviceId = freezed,Object? categoryId = freezed,Object? name = null,Object? avatarUrl = freezed,Object? profession = freezed,Object? rating = null,Object? distance = null,Object? hourlyPrice = null,Object? minServicePrice = null,Object? hasServices = null,Object? isNew = null,Object? latitude = freezed,Object? longitude = freezed,Object? city = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? serviceId = freezed,Object? categoryId = freezed,Object? category = freezed,Object? name = null,Object? avatarUrl = freezed,Object? profession = freezed,Object? rating = null,Object? distance = null,Object? hourlyPrice = null,Object? minServicePrice = null,Object? hasServices = null,Object? isNew = null,Object? latitude = freezed,Object? longitude = freezed,Object? city = freezed,}) {
   return _then(_CraftsmanModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,serviceId: freezed == serviceId ? _self.serviceId : serviceId // ignore: cast_nullable_to_non_nullable
 as String?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
-as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
+as CategoryModel?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,profession: freezed == profession ? _self.profession : profession // ignore: cast_nullable_to_non_nullable
 as String?,rating: null == rating ? _self.rating : rating // ignore: cast_nullable_to_non_nullable
@@ -343,7 +360,19 @@ as String?,
   ));
 }
 
+/// Create a copy of CraftsmanModel
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CategoryModelCopyWith<$Res>? get category {
+    if (_self.category == null) {
+    return null;
+  }
 
+  return $CategoryModelCopyWith<$Res>(_self.category!, (value) {
+    return _then(_self.copyWith(category: value));
+  });
+}
 }
 
 // dart format on

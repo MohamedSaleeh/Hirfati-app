@@ -1,27 +1,39 @@
 import 'package:flutter/material.dart';
-import '../../../../../translations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../../core/presentation/providers/language_provider.dart';
 import '../../domain_models/category_model.dart';
 
 IconData _iconForCategory(String? icon, String name) {
   final key = (icon ?? name).toLowerCase();
-  if (key.contains('plumb') || key.contains('water'))
+  if (key.contains('plumb') || key.contains('water')) {
     return Icons.water_drop_outlined;
-  if (key.contains('electric') || key.contains('power'))
+  }
+  if (key.contains('electric') || key.contains('power')) {
     return Icons.bolt_outlined;
-  if (key.contains('wood') || key.contains('carpent'))
+  }
+  if (key.contains('wood') || key.contains('carpent')) {
     return Icons.carpenter_outlined;
-  if (key.contains('paint')) return Icons.format_paint_outlined;
-  if (key.contains('clean')) return Icons.cleaning_services_outlined;
-  if (key.contains('ac') || key.contains('air') || key.contains('cool'))
+  }
+  if (key.contains('paint')) {
+    return Icons.format_paint_outlined;
+  }
+  if (key.contains('clean')) {
+    return Icons.cleaning_services_outlined;
+  }
+  if (key.contains('ac') || key.contains('air') || key.contains('cool')) {
     return Icons.ac_unit_outlined;
-  if (key.contains('lock') || key.contains('security'))
+  }
+  if (key.contains('lock') || key.contains('security')) {
     return Icons.lock_outline_rounded;
-  if (key.contains('garden') || key.contains('plant'))
+  }
+  if (key.contains('garden') || key.contains('plant')) {
     return Icons.park_outlined;
+  }
   return Icons.handyman_outlined;
 }
 
-class CategoryItemWidget extends StatelessWidget {
+class CategoryItemWidget extends ConsumerWidget {
   final CategoryModel category;
   final bool isSelected;
   final VoidCallback? onTap;
@@ -34,9 +46,11 @@ class CategoryItemWidget extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final language = ref.watch(language_provider);
+    final displayName = resolveCategoryDisplayName(category, language);
 
     return GestureDetector(
       onTap: onTap,
@@ -70,7 +84,7 @@ class CategoryItemWidget extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            category.name.i18n,
+            displayName,
             style: theme.textTheme.labelSmall?.copyWith(
               color: colorScheme.onSurface,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,

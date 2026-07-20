@@ -49,6 +49,14 @@ Data access is mostly implemented through Supabase datasource classes in `data/d
 Repository interfaces are placed in `domain/repositories`, and implementations are placed in `data/repositories`.
 Provider files often connect `Supabase.instance.client`, datasources, and repositories.
 
+Client home categories are loaded from `categories` with nested
+`category_translations` rows. The canonical `categories.name` remains the
+database fallback, while UI labels resolve by active locale, then English
+translation, then canonical name. Client home craftsman search uses the
+`search_approved_worker_ids` Supabase RPC to match approved workers by profile
+name, canonical category name, translated category name, and multilingual
+category aliases before loading worker details.
+
 ## Shared Code
 
 Shared utilities, widgets, models, services, and core presentation providers live under `lib/core`.

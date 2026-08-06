@@ -18,18 +18,18 @@ class WalletSupabaseDatasource {
     return WalletAccount.fromJson(response);
   }
 
-  Future<List<WalletPayment>> getPayments(String userId) async {
+  Future<List<WalletTransaction>> getTransactions(String userId) async {
     final response = await _client
-        .from('payments')
+        .from('wallet_transactions')
         .select(
-          'id, order_id, amount, status, payment_method, transaction_id, '
-          'created_at, paid_at, user_id, reference_number, fee, metadata, '
-          'idempotency_key, updated_at, provider',
+          'id, wallet_user_id, counterparty_user_id, payment_id, order_id, '
+          'transaction_type, direction, amount, balance_before, balance_after, '
+          'status, transfer_group, currency, title, description, created_at',
         )
-        .eq('user_id', userId)
+        .eq('wallet_user_id', userId)
         .order('created_at', ascending: false);
 
-    return _rows(response).map(WalletPayment.fromJson).toList();
+    return _rows(response).map(WalletTransaction.fromJson).toList();
   }
 
   Future<List<WalletPaymentEvent>> getPaymentEvents({
@@ -42,7 +42,7 @@ class WalletSupabaseDatasource {
         .from('payments')
         .select('id')
         .eq('id', paymentId)
-        .eq('user_id', userId)
+        .or('payer_id.eq.$userId,payee_id.eq.$userId')
         .maybeSingle();
 
     if (payment == null) return const [];

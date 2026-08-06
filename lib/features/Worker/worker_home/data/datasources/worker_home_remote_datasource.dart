@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/models/order.dart';
 import '../../domain/models/worker_dashboard_data.dart';
@@ -353,25 +350,18 @@ class WorkerHomeRemoteDatasourceImpl implements WorkerHomeRemoteDatasource {
         'Please pay $price SAR for "$serviceTitle" completed by $workerName.';
 
     try {
-      final supabaseUrl = dotenv.env['SUPABASE_URL'];
-      final serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
-
-      final response = await http.post(
-        Uri.parse('$supabaseUrl/functions/v1/send-notification'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $serviceRoleKey',
-        },
-        body: jsonEncode({
+      final response = await client.functions.invoke(
+        'send-notification',
+        body: {
           'userId': clientId,
           'title': title,
           'body': body,
           'type': 'payment_request',
           'orderId': orderId,
-        }),
+        },
       );
 
-      print('🔵 [DEBUG] Payment request response: ${response.statusCode}');
+      print('🔵 [DEBUG] Payment request response: ${response.status}');
     } catch (e) {
       print('❌ Error sending payment request: $e');
     }
@@ -424,33 +414,26 @@ class WorkerHomeRemoteDatasourceImpl implements WorkerHomeRemoteDatasource {
     print('🔵 [DEBUG] Body: $body');
 
     try {
-      final supabaseUrl = dotenv.env['SUPABASE_URL'];
-      final serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
-
       print('🔵 [DEBUG] Sending HTTP request to edge function...');
 
-      final response = await http.post(
-        Uri.parse('$supabaseUrl/functions/v1/send-notification'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $serviceRoleKey',
-        },
-        body: jsonEncode({
+      final response = await client.functions.invoke(
+        'send-notification',
+        body: {
           'userId': clientId,
           'title': title,
           'body': body,
           'type': notificationType,
           'orderId': orderId,
-        }),
+        },
       );
 
-      print('🔵 [DEBUG] Response status: ${response.statusCode}');
-      print('🔵 [DEBUG] Response body: ${response.body}');
+      print('🔵 [DEBUG] Response status: ${response.status}');
+      print('🔵 [DEBUG] Response body: ${response.data}');
 
-      if (response.statusCode == 200) {
+      if (response.status == 200) {
         print('✅ Notification sent to client: $clientId');
       } else {
-        print('❌ Failed to send notification: ${response.body}');
+        print('❌ Failed to send notification: ${response.data}');
       }
     } catch (e) {
       print('❌ Error sending notification: $e');

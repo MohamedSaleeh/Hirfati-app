@@ -57,6 +57,9 @@ class OrderActionButtons extends ConsumerWidget {
                   // ✅ 1. تحديث حالة الطلب إلى completed
                   await actions.completeOrder(order.id);
 
+                  if (context.mounted) Navigator.pop(context);
+                  return;
+
                   if (!context.mounted) return;
 
                   // ✅ 2. عرض شاشة الدفع

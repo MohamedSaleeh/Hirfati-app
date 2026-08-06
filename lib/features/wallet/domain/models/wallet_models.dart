@@ -25,64 +25,77 @@ class WalletAccount {
   }
 }
 
-class WalletPayment {
+class WalletTransaction {
   final String id;
+  final String walletUserId;
+  final String? counterpartyUserId;
+  final String? paymentId;
   final String? orderId;
+  final String transactionType;
+  final String direction;
   final double amount;
-  final String? status;
-  final String? paymentMethod;
-  final String? transactionId;
+  final double balanceBefore;
+  final double balanceAfter;
+  final String status;
+  final String? transferGroup;
+  final String currency;
+  final String? title;
+  final String? description;
   final DateTime? createdAt;
-  final DateTime? paidAt;
-  final String? userId;
-  final String? referenceNumber;
-  final double fee;
   final Map<String, dynamic>? metadata;
-  final String? idempotencyKey;
-  final DateTime? updatedAt;
-  final String provider;
 
-  const WalletPayment({
+  const WalletTransaction({
     required this.id,
+    required this.walletUserId,
+    this.counterpartyUserId,
+    this.paymentId,
     this.orderId,
+    required this.transactionType,
+    required this.direction,
     required this.amount,
-    this.status,
-    this.paymentMethod,
-    this.transactionId,
+    required this.balanceBefore,
+    required this.balanceAfter,
+    required this.status,
+    this.transferGroup,
+    required this.currency,
+    this.title,
+    this.description,
     this.createdAt,
-    this.paidAt,
-    this.userId,
-    this.referenceNumber,
-    required this.fee,
     this.metadata,
-    this.idempotencyKey,
-    this.updatedAt,
-    required this.provider,
   });
 
-  factory WalletPayment.fromJson(Map<String, dynamic> json) {
-    return WalletPayment(
+  factory WalletTransaction.fromJson(Map<String, dynamic> json) {
+    return WalletTransaction(
       id: json['id']?.toString() ?? '',
+      walletUserId: json['wallet_user_id']?.toString() ?? '',
+      counterpartyUserId: _stringOrNull(json['counterparty_user_id']),
+      paymentId: _stringOrNull(json['payment_id']),
       orderId: _stringOrNull(json['order_id']),
+      transactionType: _stringOrNull(json['transaction_type']) ?? 'payment',
+      direction: _stringOrNull(json['direction']) ?? 'debit',
       amount: parseWalletNumeric(json['amount']),
-      status: _stringOrNull(json['status']),
-      paymentMethod: _stringOrNull(json['payment_method']),
-      transactionId: _stringOrNull(json['transaction_id']),
+      balanceBefore: parseWalletNumeric(json['balance_before']),
+      balanceAfter: parseWalletNumeric(json['balance_after']),
+      status: _stringOrNull(json['status']) ?? 'pending',
+      transferGroup: _stringOrNull(json['transfer_group']),
+      currency: _stringOrNull(json['currency']) ?? 'SYP',
+      title: _stringOrNull(json['title']),
+      description: _stringOrNull(json['description']),
       createdAt: parseWalletDate(json['created_at']),
-      paidAt: parseWalletDate(json['paid_at']),
-      userId: _stringOrNull(json['user_id']),
-      referenceNumber: _stringOrNull(json['reference_number']),
-      fee: parseWalletNumeric(json['fee']),
       metadata: _mapOrNull(json['metadata']),
-      idempotencyKey: _stringOrNull(json['idempotency_key']),
-      updatedAt: parseWalletDate(json['updated_at']),
-      provider: _stringOrNull(json['provider']) ?? 'sham_cash_mock',
     );
   }
 
+  String? get paymentMethod => transactionType;
+  String? get transactionId => transferGroup;
+  DateTime? get paidAt => status == 'completed' ? createdAt : null;
+  String? get referenceNumber => transferGroup;
+  double get fee => 0;
+  String get provider => 'wallet';
+
   String get displayStatus {
-    final value = status?.trim();
-    if (value == null || value.isEmpty) return 'unknown';
+    final value = status.trim();
+    if (value.isEmpty) return 'unknown';
     return value;
   }
 }
@@ -119,12 +132,12 @@ class WalletPaymentEvent {
 class WalletData {
   final WalletAccount wallet;
   final bool walletExists;
-  final List<WalletPayment> payments;
+  final List<WalletTransaction> transactions;
 
   const WalletData({
     required this.wallet,
     required this.walletExists,
-    required this.payments,
+    required this.transactions,
   });
 }
 

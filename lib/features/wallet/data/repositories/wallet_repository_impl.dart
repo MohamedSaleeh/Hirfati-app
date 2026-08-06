@@ -10,15 +10,15 @@ class WalletRepositoryImpl implements WalletRepository {
   @override
   Future<WalletData> getWalletData(String userId) async {
     final walletFuture = _datasource.getWallet(userId);
-    final paymentsFuture = _datasource.getPayments(userId);
+    final transactionsFuture = _datasource.getTransactions(userId);
 
     final wallet = await walletFuture;
-    final payments = await paymentsFuture;
+    final transactions = await transactionsFuture;
 
     return WalletData(
       wallet: wallet ?? WalletAccount.empty(userId),
       walletExists: wallet != null,
-      payments: payments,
+      transactions: transactions,
     );
   }
 

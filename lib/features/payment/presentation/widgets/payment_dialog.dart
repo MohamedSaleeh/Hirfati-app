@@ -1,7 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/models/order.dart';
+import '../../../Client/orders/presentation/providers/orders_provider.dart';
+import '../../../wallet/presentation/providers/wallet_provider.dart';
 import '../../../../translations.dart';
+import '../../domain/models/payment.dart';
 import '../providers/payment_notifier.dart';
 import '../screens/card_payment_screen.dart';
 
@@ -20,13 +25,13 @@ class PaymentDialog extends ConsumerStatefulWidget {
 }
 
 class _PaymentDialogState extends ConsumerState<PaymentDialog> {
-  String _selectedMethod = 'cash';
+  String _selectedMethod = 'wallet';
   bool _isProcessing = false;
+  bool _successHandled = false;
+  String? _idempotencyKey;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
@@ -222,7 +227,6 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           },
           contentPadding: EdgeInsets.zero,
         ),
-    
       ],
     );
   }
@@ -264,13 +268,15 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   }
 
   Future<void> _processPayment() async {
+    if (_isProcessing || _successHandled) return;
     final theme = Theme.of(context);
     setState(() => _isProcessing = true);
+    _idempotencyKey ??= _newUuidV4();
 
     try {
       final paymentNotifier = ref.read(paymentNotifierProvider.notifier);
 
-      bool success = false;
+      PaymentSettlementResult? result;
 
       if (_selectedMethod == 'card') {
         final cardDetails = await Navigator.push<Map<String, dynamic>>(
@@ -285,21 +291,38 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           return;
         }
 
-        success = await paymentNotifier.processPayment(
+        result = await paymentNotifier.processPayment(
           order: widget.order,
           paymentMethod: _selectedMethod,
+          idempotencyKey: _idempotencyKey!,
           cardDetails: cardDetails,
         );
-      }  else {
-        success = await paymentNotifier.processPayment(
+      } else {
+        result = await paymentNotifier.processPayment(
           order: widget.order,
           paymentMethod: _selectedMethod,
+          idempotencyKey: _idempotencyKey!,
         );
       }
 
-      if (success && mounted ) {
+      if (result != null && (result.success || result.idempotent) && mounted) {
+        _successHandled = true;
+        ref.invalidate(walletProvider);
+        ref.invalidate(ordersProvider(OrderStatus.pending));
+        ref.invalidate(ordersProvider(OrderStatus.completed));
         Navigator.pop(context);
         widget.onSuccess();
+      } else if (mounted) {
+        final paymentState = ref.read(paymentNotifierProvider);
+        final message = paymentState.hasError
+            ? paymentState.error.toString()
+            : 'Payment failed'.i18n;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: theme.colorScheme.error,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -311,9 +334,23 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
         );
       }
     } finally {
+      _idempotencyKey = null;
       if (mounted) {
         setState(() => _isProcessing = false);
       }
     }
   }
+}
+
+String _newUuidV4() {
+  final random = Random.secure();
+  final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  final hex = bytes
+      .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+      .join();
+  return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
+      '${hex.substring(12, 16)}-${hex.substring(16, 20)}-'
+      '${hex.substring(20)}';
 }

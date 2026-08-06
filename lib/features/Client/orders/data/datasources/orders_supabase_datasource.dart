@@ -1,25 +1,10 @@
-import 'dart:convert';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/models/order.dart';
 import '../../domain/models/order_model.dart';
 
 class OrdersSupabaseDatasource {
   final SupabaseClient _supabaseClient;
-  late final SupabaseClient _serviceRoleClient;
-  OrdersSupabaseDatasource(this._supabaseClient) {
-    final supabaseUrl = dotenv.env['SUPABASE_URL'];
-    final serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
-
-    if (supabaseUrl == null || serviceRoleKey == null) {
-      throw Exception('Missing Supabase configuration in .env file');
-    }
-
-    _serviceRoleClient = SupabaseClient(supabaseUrl, serviceRoleKey);
-    print('✅ Service Role Client initialized');
-  }
+  OrdersSupabaseDatasource(this._supabaseClient);
 
   // ============================================================
   // Get User ID Helper
@@ -230,6 +215,11 @@ class OrdersSupabaseDatasource {
     String? paymentMethod,
     String? transactionId,
   }) async {
+    if (status == PaymentStatus.paid) {
+      throw UnsupportedError(
+        'Paid order fields are settled only by settle_order_payment',
+      );
+    }
     print('💰 updatePaymentStatus() called:');
     print('   - orderId: $orderId');
     print('   - status: ${status.name}');
@@ -240,13 +230,7 @@ class OrdersSupabaseDatasource {
       final userId = _getUserId();
       print('   - UserId: $userId');
 
-      final updateData = {
-        'payment_status': _paymentStatusToString(status),
-        if (paymentMethod != null) 'payment_method': paymentMethod,
-        if (transactionId != null) 'payment_transaction_id': transactionId,
-        if (status == PaymentStatus.paid)
-          'paid_at': DateTime.now().toIso8601String(),
-      };
+      final updateData = {'payment_status': _paymentStatusToString(status)};
 
       print('   - Update data: $updateData');
 
@@ -257,11 +241,6 @@ class OrdersSupabaseDatasource {
           .eq('client_id', userId);
 
       print('✅ Payment status updated for order: $orderId → ${status.name}');
-
-      if (status == PaymentStatus.paid) {
-        await _sendPaymentConfirmationNotification(orderId);
-        await _updateWorkerBalanceForOrder(orderId);
-      }
     } catch (e) {
       print('❌ Error updating payment status: $e');
       rethrow;
@@ -472,6 +451,7 @@ class OrdersSupabaseDatasource {
   }
 
   Future<void> _updateWorkerBalanceForOrder(String orderId) async {
+    /* Disabled: wallet settlement is owned by settle_order_payment.
     print(
       '💰💰💰 _updateWorkerBalanceForOrder CALLED for order: $orderId 💰💰💰',
     );
@@ -506,15 +486,15 @@ class OrdersSupabaseDatasource {
 
       // ✅ استخدام Service Role Client لتجاوز RLS
       // ✅ تحديث رصيد الحرفي في جدول wallets (موحد)
-      final existingBalance = await _serviceRoleClient
-          .from('wallets')
+      final existingBalance = await disabledFinancialClient
+          .from('disabled_financial_table')
           .select('balance')
           .eq('user_id', workerUserId)
           .maybeSingle();
 
       if (existingBalance == null) {
         print('📝 No existing wallet, creating new record...');
-        await _serviceRoleClient.from('wallets').insert({
+        await disabledFinancialClient.from('disabled_financial_table').insert({
           'user_id': workerUserId,
           'balance': amount,
           'created_at': DateTime.now().toIso8601String(),
@@ -527,8 +507,8 @@ class OrdersSupabaseDatasource {
 
         print('📝 Updating balance: $currentBalance → $newBalance');
 
-        await _serviceRoleClient
-            .from('wallets')
+        await disabledFinancialClient
+            .from('disabled_financial_table')
             .update({
               'balance': newBalance,
               'updated_at': DateTime.now().toIso8601String(),
@@ -540,9 +520,11 @@ class OrdersSupabaseDatasource {
     } catch (e) {
       print('❌ Error updating worker balance: $e');
     }
+    */
   }
 
   Future<void> _sendPaymentConfirmationNotification(String orderId) async {
+    /* Disabled: settlement notifications are emitted by the backend.
     try {
       final order = await _supabaseClient
           .from('orders')
@@ -574,13 +556,13 @@ class OrdersSupabaseDatasource {
       print('📧 Sending payment confirmation to worker: $workerName');
 
       final supabaseUrl = dotenv.env['SUPABASE_URL']!;
-      final serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY']!;
+      final removedCredential = disabledConfiguration;
 
       final response = await http.post(
         Uri.parse('$supabaseUrl/functions/v1/send-notification'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $serviceRoleKey',
+          'Authorization': 'Bearer $removedCredential',
         },
         body: jsonEncode({
           'userId': workerUserId,
@@ -601,5 +583,6 @@ class OrdersSupabaseDatasource {
     } catch (e) {
       print('❌ Error sending payment confirmation: $e');
     }
+    */
   }
 }

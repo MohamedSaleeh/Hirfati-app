@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../domain/models/payment.dart';
 
 class PaymentSupabaseDatasource {
@@ -6,171 +7,105 @@ class PaymentSupabaseDatasource {
 
   PaymentSupabaseDatasource(this._client);
 
-  Future<Payment> createPayment({
+  static Map<String, dynamic> settlementParameters({
     required String orderId,
-    required double amount,
-    required String userId,
-    String? paymentMethod,
-  }) async {
-    final response = await _client
-        .from('payments')
-        .insert({
-          'order_id': orderId,
-          'amount': amount,
-          'user_id': userId,
-          'payment_method': paymentMethod,
-          'status': 'pending',
-          'created_at': DateTime.now().toIso8601String(),
-        })
-        .select()
-        .single();
-
-    return Payment(
-      id: response['id'],
-      orderId: response['order_id'],
-      amount: (response['amount'] as num).toDouble(),
-      status: _parseStatus(response['status']),
-      paymentMethod: response['payment_method'],
-      transactionId: response['transaction_id'],
-      paidAt: response['paid_at'] != null
-          ? DateTime.parse(response['paid_at'])
-          : null,
-      createdAt: DateTime.parse(response['created_at']),
-    );
+    required String idempotencyKey,
+  }) {
+    return {
+      'p_order_id': orderId,
+      'p_payment_method': 'wallet',
+      'p_idempotency_key': idempotencyKey,
+      'p_provider_transaction_id': null,
+      'p_provider': 'wallet',
+    };
   }
 
-  Future<Payment> updatePaymentStatus(
-    String paymentId,
-    PaymentTransactionStatus status, {
-    String? transactionId,
+  Future<PaymentSettlementResult> settleWalletPayment({
+    required String orderId,
+    required String idempotencyKey,
   }) async {
-    print('📝 Updating payment status:');
-    print('   - paymentId: $paymentId');
-    print('   - status: ${status.name}');
-    print('   - transactionId: $transactionId');
-
-    final updateData = {
-      'status': _statusToString(status),
-      if (transactionId != null) 'transaction_id': transactionId,
-      if (status == PaymentTransactionStatus.completed)
-        'paid_at': DateTime.now().toIso8601String(),
-    };
-
-    // ✅ أولاً: تحديث البيانات
-    await _client.from('payments').update(updateData).eq('id', paymentId);
-
-    // ✅ ثانياً: جلب البيانات بعد التحديث
-    final response = await _client
-        .from('payments')
-        .select()
-        .eq('id', paymentId)
-        .maybeSingle();
-
-    if (response == null) {
-      print('❌ Payment not found after update: $paymentId');
-      throw Exception('Payment not found');
+    try {
+      final response = await _client.rpc(
+        'settle_order_payment',
+        params: settlementParameters(
+          orderId: orderId,
+          idempotencyKey: idempotencyKey,
+        ),
+      );
+      final json = _responseMap(response);
+      final result = PaymentSettlementResult.fromJson(json);
+      if (!result.success) {
+        throw const PaymentException('payment_failed', 'Payment failed');
+      }
+      return result;
+    } on PostgrestException catch (error) {
+      throw mapPaymentError(error);
+    } on PaymentException {
+      rethrow;
+    } catch (_) {
+      throw const PaymentException('payment_failed', 'Payment failed');
     }
-
-    print('✅ Payment status updated: ${response['status']}');
-
-    return Payment(
-      id: response['id'],
-      orderId: response['order_id'],
-      amount: (response['amount'] as num).toDouble(),
-      status: _parseStatus(response['status']),
-      paymentMethod: response['payment_method'],
-      transactionId: response['transaction_id'],
-      paidAt: response['paid_at'] != null
-          ? DateTime.parse(response['paid_at'])
-          : null,
-      createdAt: DateTime.parse(response['created_at']),
-    );
   }
 
   Future<Payment?> getPaymentByOrderId(String orderId) async {
-    print('🔍 Getting payment by orderId: $orderId');
-
     final response = await _client
         .from('payments')
         .select()
         .eq('order_id', orderId)
         .maybeSingle();
-
-    if (response == null) {
-      print('⚠️ No payment found for order: $orderId');
-      return null;
-    }
+    if (response == null) return null;
 
     return Payment(
-      id: response['id'],
-      orderId: response['order_id'],
+      id: response['id'].toString(),
+      orderId: response['order_id'].toString(),
       amount: (response['amount'] as num).toDouble(),
-      status: _parseStatus(response['status']),
-      paymentMethod: response['payment_method'],
-      transactionId: response['transaction_id'],
-      paidAt: response['paid_at'] != null
-          ? DateTime.parse(response['paid_at'])
-          : null,
-      createdAt: DateTime.parse(response['created_at']),
+      status: _parseStatus(response['status']?.toString()),
+      paymentMethod: response['payment_method']?.toString(),
+      transactionId: response['transaction_id']?.toString(),
+      paidAt: DateTime.tryParse(response['paid_at']?.toString() ?? ''),
+      createdAt:
+          DateTime.tryParse(response['created_at']?.toString() ?? '') ??
+          DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 
-  Future<List<Payment>> getUserPayments(String userId) async {
-    print('🔍 Getting payments for user: $userId');
-
-    final response = await _client
-        .from('payments')
-        .select()
-        .eq('user_id', userId)
-        .order('created_at', ascending: false);
-
-    return (response as List)
-        .map(
-          (json) => Payment(
-            id: json['id'],
-            orderId: json['order_id'],
-            amount: (json['amount'] as num).toDouble(),
-            status: _parseStatus(json['status']),
-            paymentMethod: json['payment_method'],
-            transactionId: json['transaction_id'],
-            paidAt: json['paid_at'] != null
-                ? DateTime.parse(json['paid_at'])
-                : null,
-            createdAt: DateTime.parse(json['created_at']),
-          ),
-        )
-        .toList();
+  static PaymentException mapPaymentError(Object error) {
+    final raw = error is PostgrestException
+        ? '${error.code} ${error.message} ${error.details}'
+        : error.toString();
+    const messages = {
+      'insufficient_wallet_balance': 'Insufficient wallet balance',
+      'already_paid': 'This order has already been paid',
+      'invalid_order_state': 'This order cannot be paid in its current state',
+      'idempotency_conflict':
+          'This payment attempt conflicts with another request',
+      'forbidden': 'You are not allowed to pay this order',
+      'unauthenticated': 'Please sign in to continue',
+      'worker_wallet_not_found': 'The worker wallet is not available',
+    };
+    for (final entry in messages.entries) {
+      if (raw.contains(entry.key)) {
+        return PaymentException(entry.key, entry.value);
+      }
+    }
+    return const PaymentException('payment_failed', 'Payment failed');
   }
 
-  String _statusToString(PaymentTransactionStatus status) {
-    switch (status) {
-      case PaymentTransactionStatus.pending:
-        return 'pending';
-      case PaymentTransactionStatus.processing:
-        return 'processing';
-      case PaymentTransactionStatus.completed:
-        return 'completed';
-      case PaymentTransactionStatus.failed:
-        return 'failed';
-      case PaymentTransactionStatus.refunded:
-        return 'refunded';
+  Map<String, dynamic> _responseMap(Object? response) {
+    if (response is Map) return Map<String, dynamic>.from(response);
+    if (response is List && response.isNotEmpty && response.first is Map) {
+      return Map<String, dynamic>.from(response.first as Map);
     }
+    return const {};
   }
 
-  PaymentTransactionStatus _parseStatus(String status) {
-    switch (status) {
-      case 'pending':
-        return PaymentTransactionStatus.pending;
-      case 'processing':
-        return PaymentTransactionStatus.processing;
-      case 'completed':
-        return PaymentTransactionStatus.completed;
-      case 'failed':
-        return PaymentTransactionStatus.failed;
-      case 'refunded':
-        return PaymentTransactionStatus.refunded;
-      default:
-        return PaymentTransactionStatus.pending;
-    }
+  PaymentTransactionStatus _parseStatus(String? status) {
+    return switch (status) {
+      'processing' => PaymentTransactionStatus.processing,
+      'completed' => PaymentTransactionStatus.completed,
+      'failed' => PaymentTransactionStatus.failed,
+      'refunded' => PaymentTransactionStatus.refunded,
+      _ => PaymentTransactionStatus.pending,
+    };
   }
 }

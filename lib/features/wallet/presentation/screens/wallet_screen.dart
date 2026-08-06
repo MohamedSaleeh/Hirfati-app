@@ -46,7 +46,7 @@ class WalletScreen extends ConsumerWidget {
                 _WalletBalanceCard(data: data),
                 const SizedBox(height: 24),
                 _PaymentHistorySection(
-                  payments: data.payments,
+                  transactions: data.transactions,
                   onPaymentTap: (payment) {
                     showModalBottomSheet<void>(
                       context: context,
@@ -168,11 +168,11 @@ class _WalletBalanceCard extends StatelessWidget {
 }
 
 class _PaymentHistorySection extends StatelessWidget {
-  final List<WalletPayment> payments;
-  final ValueChanged<WalletPayment> onPaymentTap;
+  final List<WalletTransaction> transactions;
+  final ValueChanged<WalletTransaction> onPaymentTap;
 
   const _PaymentHistorySection({
-    required this.payments,
+    required this.transactions,
     required this.onPaymentTap,
   });
 
@@ -191,7 +191,7 @@ class _PaymentHistorySection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        if (payments.isEmpty)
+        if (transactions.isEmpty)
           _WalletEmptyState(
             icon: Icons.receipt_long_outlined,
             title: 'No payments yet'.i18n,
@@ -206,14 +206,14 @@ class _PaymentHistorySection extends StatelessWidget {
             child: ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: payments.length,
+              itemCount: transactions.length,
               separatorBuilder: (context, index) => Divider(
                 height: 1,
                 indent: 72,
                 color: colorScheme.surfaceContainerHighest,
               ),
               itemBuilder: (context, index) {
-                final payment = payments[index];
+                final payment = transactions[index];
                 return _PaymentTile(
                   payment: payment,
                   onTap: () => onPaymentTap(payment),
@@ -227,7 +227,7 @@ class _PaymentHistorySection extends StatelessWidget {
 }
 
 class _PaymentTile extends StatelessWidget {
-  final WalletPayment payment;
+  final WalletTransaction payment;
   final VoidCallback onTap;
 
   const _PaymentTile({required this.payment, required this.onTap});
@@ -328,7 +328,7 @@ class _PaymentTile extends StatelessWidget {
 }
 
 class _PaymentDetailsSheet extends ConsumerWidget {
-  final WalletPayment payment;
+  final WalletTransaction payment;
 
   const _PaymentDetailsSheet({required this.payment});
 
@@ -336,7 +336,9 @@ class _PaymentDetailsSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final eventsAsync = ref.watch(paymentEventsProvider(payment.id));
+    final eventsAsync = ref.watch(
+      paymentEventsProvider(payment.paymentId ?? ''),
+    );
     final safeMetadata = safeWalletMetadataFields(payment.metadata);
 
     return DraggableScrollableSheet(
@@ -758,7 +760,7 @@ String? _formatDateOrNull(DateTime? date) {
   return _formatDate(date);
 }
 
-String _paymentTitle(WalletPayment payment) {
+String _paymentTitle(WalletTransaction payment) {
   if (payment.paymentMethod != null) {
     return _formatEnumLabel(payment.paymentMethod!);
   }

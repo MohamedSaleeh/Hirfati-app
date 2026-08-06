@@ -1,22 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/presentation/providers/language_provider.dart';
 import '../../../../../translations.dart';
 import '../../domain_models/category_model.dart';
 import '../../domain_models/craftsman_model.dart';
 
-class CraftsmanCardWidget extends ConsumerWidget {
+class CraftsmanCardWidget extends StatelessWidget {
   final CraftsmanModel craftsman;
 
   const CraftsmanCardWidget({super.key, required this.craftsman});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final language = ref.watch(language_provider);
+    final language = Localizations.localeOf(context).languageCode;
     final professionLabel = craftsman.category == null
         ? craftsman.profession ?? ''
         : resolveCategoryDisplayName(craftsman.category!, language);

@@ -48,11 +48,18 @@ class MapSupabaseDatasourceImpl implements MapRemoteDatasource {
   Future<List<CategoryModel>> fetchCategories() async {
     final response = await _client
         .from('categories')
-        .select('id, name, icon')
+        .select(
+          'id, name, icon, category_translations('
+          'category_id, locale, name, search_terms, created_at, updated_at)',
+        )
         .order('name');
 
     return (response as List<dynamic>)
-        .map((e) => CategoryModel.fromJson(Map<String, dynamic>.from(e as Map)))
+        .map(
+          (e) => CategoryModel.fromSupabaseRow(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
         .toList();
   }
 

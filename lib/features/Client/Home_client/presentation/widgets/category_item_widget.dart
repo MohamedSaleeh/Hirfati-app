@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/presentation/providers/language_provider.dart';
 import '../../domain_models/category_model.dart';
 
 IconData _iconForCategory(String? icon, String name) {
@@ -33,7 +31,7 @@ IconData _iconForCategory(String? icon, String name) {
   return Icons.handyman_outlined;
 }
 
-class CategoryItemWidget extends ConsumerWidget {
+class CategoryItemWidget extends StatelessWidget {
   final CategoryModel category;
   final bool isSelected;
   final VoidCallback? onTap;
@@ -46,10 +44,10 @@ class CategoryItemWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final language = ref.watch(language_provider);
+    final language = Localizations.localeOf(context).languageCode;
     final displayName = resolveCategoryDisplayName(category, language);
 
     return GestureDetector(

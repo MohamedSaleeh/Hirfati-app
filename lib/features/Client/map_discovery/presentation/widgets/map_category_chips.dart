@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../../translations.dart';
+import '../../../Home_client/domain_models/category_model.dart';
 import '../providers/map_providers.dart';
 
 class MapCategoryChips extends ConsumerWidget {
@@ -11,6 +12,7 @@ class MapCategoryChips extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final language = Localizations.localeOf(context).languageCode;
     final categoriesAsync = ref.watch(mapCategoriesProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
 
@@ -30,7 +32,9 @@ class MapCategoryChips extends ConsumerWidget {
                   ? selectedCategory == null
                   : selectedCategory == category!.name;
 
-              final labelText = isAll ? 'All'.i18n : category!.name;
+              final labelText = isAll
+                  ? 'All'.i18n
+                  : resolveCategoryDisplayName(category!, language);
 
               return Material(
                 color: Colors.transparent,

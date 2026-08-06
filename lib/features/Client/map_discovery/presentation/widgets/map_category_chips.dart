@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
+import '../../../../../core/presentation/providers/language_provider.dart';
 import '../../../../../translations.dart';
+import '../../../Home_client/domain_models/category_model.dart';
 import '../providers/map_providers.dart';
 
 class MapCategoryChips extends ConsumerWidget {
@@ -12,7 +14,8 @@ class MapCategoryChips extends ConsumerWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final categoriesAsync = ref.watch(mapCategoriesProvider);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final selectedCategoryId = ref.watch(selectedCategoryProvider);
+    final language = ref.watch(language_provider);
 
     return categoriesAsync.when(
       data: (categories) {
@@ -22,15 +25,17 @@ class MapCategoryChips extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             scrollDirection: Axis.horizontal,
             itemCount: categories.length + 1,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final isAll = index == 0;
               final category = isAll ? null : categories[index - 1];
               final isSelected = isAll
-                  ? selectedCategory == null
-                  : selectedCategory == category!.name;
+                  ? selectedCategoryId == null
+                  : selectedCategoryId == category!.id;
 
-              final labelText = isAll ? 'All'.i18n : category!.name;
+              final labelText = isAll
+                  ? 'All'.i18n
+                  : resolveCategoryDisplayName(category!, language);
 
               return Material(
                 color: Colors.transparent,
@@ -38,7 +43,7 @@ class MapCategoryChips extends ConsumerWidget {
                   onTap: () {
                     ref.read(selectedCategoryProvider.notifier).state = isAll
                         ? null
-                        : category!.name;
+                        : category!.id;
                   },
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
@@ -51,7 +56,7 @@ class MapCategoryChips extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: colorScheme.shadow.withOpacity(0.05),
+                          color: colorScheme.shadow.withValues(alpha: 0.05),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -86,7 +91,7 @@ class MapCategoryChips extends ConsumerWidget {
           ),
         ),
       ),
-      error: (_, __) => const SizedBox(height: 40),
+      error: (_, _) => const SizedBox(height: 40),
     );
   }
 }

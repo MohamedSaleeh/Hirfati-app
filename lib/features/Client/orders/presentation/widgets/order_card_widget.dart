@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/models/order.dart';
 import '../../../../../translations.dart';
 import '../../../../payment/presentation/widgets/payment_dialog.dart';
+import '../../../../wallet/presentation/providers/wallet_provider.dart';
 import '../../data/providers/orders_repository_provider.dart';
 import '../../domain/models/order_model.dart';
 import '../providers/orders_provider.dart';
@@ -491,7 +492,7 @@ class OrderCardWidget extends ConsumerWidget {
       text: 'Track'.i18n,
       bgColor: Colors.blue,
       textColor: Colors.white,
-      onPressed: () {},
+      onPressed: null,
     );
   }
 
@@ -739,11 +740,12 @@ class OrderCardWidget extends ConsumerWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => PaymentDialog(
+      builder: (_) => PaymentDialog(
         order: orderCore,
         onSuccess: () {
           ref.invalidate(ordersProvider(OrderStatus.completed));
           ref.invalidate(ordersProvider(OrderStatus.pending));
+          ref.invalidate(walletProvider);
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -6,11 +6,13 @@ import 'craftsman_card_widget.dart';
 class RecommendedSection extends StatelessWidget {
   final List<CraftsmanModel> craftsmen;
   final String? selectedCategoryId;
+  final VoidCallback? onClearFilter;
 
   const RecommendedSection({
     super.key,
     required this.craftsmen,
     this.selectedCategoryId,
+    this.onClearFilter,
   });
 
   @override
@@ -37,7 +39,7 @@ class RecommendedSection extends StatelessWidget {
             ),
             if (selectedCategoryId != null)
               TextButton(
-                onPressed: () {},
+                onPressed: onClearFilter,
                 child: Text(
                   'Clear Filter'.i18n,
                   style: TextStyle(color: colorScheme.primary, fontSize: 12),

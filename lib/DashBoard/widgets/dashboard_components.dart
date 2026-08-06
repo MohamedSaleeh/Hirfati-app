@@ -248,30 +248,36 @@ class DashboardSearchField extends StatelessWidget {
   const DashboardSearchField({
     super.key,
     required this.hint,
-    required this.onChanged,
+    this.onChanged,
     this.controller,
   });
 
   final String hint;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      enabled: onChanged != null,
       onChanged: onChanged,
       textDirection: TextDirection.rtl,
       style: const TextStyle(color: DashboardColors.text, fontSize: 13),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: DashboardColors.muted, fontSize: 12),
-        prefixIcon:
-            const Icon(Icons.search, color: DashboardColors.muted, size: 18),
+        prefixIcon: const Icon(
+          Icons.search,
+          color: DashboardColors.muted,
+          size: 18,
+        ),
         filled: true,
         fillColor: DashboardColors.surfaceAlt,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: DashboardColors.border),
@@ -301,13 +307,14 @@ class DashboardResponsiveBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxWidth =
-            constraints.hasBoundedWidth ? constraints.maxWidth : preferredWidth;
+        final maxWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : preferredWidth;
         final width = maxWidth < minWidth
             ? maxWidth
             : maxWidth < preferredWidth
-                ? maxWidth
-                : preferredWidth;
+            ? maxWidth
+            : preferredWidth;
 
         return SizedBox(width: width, child: child);
       },
@@ -342,8 +349,10 @@ class DashboardSelect<T> extends StatelessWidget {
         decoration: InputDecoration(
           filled: true,
           fillColor: DashboardColors.surfaceAlt,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: DashboardColors.border),
@@ -404,9 +413,7 @@ class DashboardButton extends StatelessWidget {
           disabledForegroundColor: DashboardColors.muted,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(7),
-            side: BorderSide(
-              color: outlined ? DashboardColors.border : color,
-            ),
+            side: BorderSide(color: outlined ? DashboardColors.border : color),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14),
         ),
@@ -536,7 +543,7 @@ class DashboardPagination extends StatelessWidget {
         DashboardIconAction(
           icon: Icons.chevron_right,
           tooltip: 'السابق',
-          onPressed: () {},
+          onPressed: null,
         ),
         const SizedBox(width: 6),
         ...pages.map(
@@ -568,7 +575,7 @@ class DashboardPagination extends StatelessWidget {
         DashboardIconAction(
           icon: Icons.chevron_left,
           tooltip: 'التالي',
-          onPressed: () {},
+          onPressed: null,
         ),
       ],
     );

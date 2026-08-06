@@ -79,7 +79,7 @@ class _CardPaymentScreenState extends ConsumerState<CardPaymentScreen> {
                       ),
                     ),
                     Text(
-                      '${widget.amount} \$',
+                      '${widget.amount} SYP',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

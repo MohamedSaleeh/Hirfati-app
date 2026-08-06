@@ -4,7 +4,7 @@ import '../../domain/models/worker_profile_portfolio_model.dart';
 
 class WorkerPortfolioPreview extends StatelessWidget {
   final List<WorkerProfilePortfolioModel> items;
-  final VoidCallback onViewAll;
+  final VoidCallback? onViewAll;
 
   const WorkerPortfolioPreview({
     super.key,
@@ -65,7 +65,7 @@ class WorkerPortfolioPreview extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String title;
-  final VoidCallback onViewAll;
+  final VoidCallback? onViewAll;
 
   const _SectionHeader({required this.title, required this.onViewAll});
 
@@ -84,13 +84,14 @@ class _SectionHeader extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        TextButton(
-          onPressed: onViewAll,
-          child: Text(
-            'View All'.i18n,
-            style: TextStyle(color: theme.colorScheme.primary),
+        if (onViewAll != null)
+          TextButton(
+            onPressed: onViewAll,
+            child: Text(
+              'View All'.i18n,
+              style: TextStyle(color: theme.colorScheme.primary),
+            ),
           ),
-        ),
       ],
     );
   }

@@ -6,36 +6,36 @@ class PaymentSupabaseDatasource {
 
   PaymentSupabaseDatasource(this._client);
 
+  Future<PaymentSettlementResult> settleOrderPayment({
+    required String orderId,
+    required String paymentMethod,
+    required String idempotencyKey,
+    String? providerTransactionId,
+  }) async {
+    final params = <String, dynamic>{
+      'p_order_id': orderId,
+      'p_payment_method': paymentMethod,
+      'p_idempotency_key': idempotencyKey,
+    };
+    if (providerTransactionId != null) {
+      params['p_provider_transaction_id'] = providerTransactionId;
+    }
+
+    final response = await _client.rpc('settle_order_payment', params: params);
+
+    return PaymentSettlementResult.fromJson(
+      Map<String, dynamic>.from(response as Map),
+    );
+  }
+
   Future<Payment> createPayment({
     required String orderId,
     required double amount,
     required String userId,
     String? paymentMethod,
   }) async {
-    final response = await _client
-        .from('payments')
-        .insert({
-          'order_id': orderId,
-          'amount': amount,
-          'user_id': userId,
-          'payment_method': paymentMethod,
-          'status': 'pending',
-          'created_at': DateTime.now().toIso8601String(),
-        })
-        .select()
-        .single();
-
-    return Payment(
-      id: response['id'],
-      orderId: response['order_id'],
-      amount: (response['amount'] as num).toDouble(),
-      status: _parseStatus(response['status']),
-      paymentMethod: response['payment_method'],
-      transactionId: response['transaction_id'],
-      paidAt: response['paid_at'] != null
-          ? DateTime.parse(response['paid_at'])
-          : null,
-      createdAt: DateTime.parse(response['created_at']),
+    throw UnsupportedError(
+      'Payment records must be created by the settle_order_payment RPC.',
     );
   }
 
@@ -44,52 +44,12 @@ class PaymentSupabaseDatasource {
     PaymentTransactionStatus status, {
     String? transactionId,
   }) async {
-    print('📝 Updating payment status:');
-    print('   - paymentId: $paymentId');
-    print('   - status: ${status.name}');
-    print('   - transactionId: $transactionId');
-
-    final updateData = {
-      'status': _statusToString(status),
-      if (transactionId != null) 'transaction_id': transactionId,
-      if (status == PaymentTransactionStatus.completed)
-        'paid_at': DateTime.now().toIso8601String(),
-    };
-
-    // ✅ أولاً: تحديث البيانات
-    await _client.from('payments').update(updateData).eq('id', paymentId);
-
-    // ✅ ثانياً: جلب البيانات بعد التحديث
-    final response = await _client
-        .from('payments')
-        .select()
-        .eq('id', paymentId)
-        .maybeSingle();
-
-    if (response == null) {
-      print('❌ Payment not found after update: $paymentId');
-      throw Exception('Payment not found');
-    }
-
-    print('✅ Payment status updated: ${response['status']}');
-
-    return Payment(
-      id: response['id'],
-      orderId: response['order_id'],
-      amount: (response['amount'] as num).toDouble(),
-      status: _parseStatus(response['status']),
-      paymentMethod: response['payment_method'],
-      transactionId: response['transaction_id'],
-      paidAt: response['paid_at'] != null
-          ? DateTime.parse(response['paid_at'])
-          : null,
-      createdAt: DateTime.parse(response['created_at']),
+    throw UnsupportedError(
+      'Payment status changes must use the settle_order_payment RPC.',
     );
   }
 
   Future<Payment?> getPaymentByOrderId(String orderId) async {
-    print('🔍 Getting payment by orderId: $orderId');
-
     final response = await _client
         .from('payments')
         .select()
@@ -97,64 +57,52 @@ class PaymentSupabaseDatasource {
         .maybeSingle();
 
     if (response == null) {
-      print('⚠️ No payment found for order: $orderId');
       return null;
     }
 
     return Payment(
-      id: response['id'],
-      orderId: response['order_id'],
-      amount: (response['amount'] as num).toDouble(),
-      status: _parseStatus(response['status']),
-      paymentMethod: response['payment_method'],
-      transactionId: response['transaction_id'],
+      id: response['id']?.toString() ?? '',
+      orderId: response['order_id']?.toString() ?? '',
+      amount: _parseAmount(response['amount']),
+      status: _parseStatus(response['status']?.toString() ?? ''),
+      paymentMethod: response['payment_method']?.toString(),
+      transactionId: response['transaction_id']?.toString(),
       paidAt: response['paid_at'] != null
-          ? DateTime.parse(response['paid_at'])
+          ? DateTime.parse(response['paid_at'].toString())
           : null,
-      createdAt: DateTime.parse(response['created_at']),
+      createdAt: DateTime.parse(response['created_at'].toString()),
     );
   }
 
   Future<List<Payment>> getUserPayments(String userId) async {
-    print('🔍 Getting payments for user: $userId');
-
     final response = await _client
         .from('payments')
         .select()
-        .eq('user_id', userId)
+        .or('payer_id.eq.$userId,payee_id.eq.$userId')
         .order('created_at', ascending: false);
 
     return (response as List)
         .map(
           (json) => Payment(
-            id: json['id'],
-            orderId: json['order_id'],
-            amount: (json['amount'] as num).toDouble(),
-            status: _parseStatus(json['status']),
-            paymentMethod: json['payment_method'],
-            transactionId: json['transaction_id'],
+            id: json['id']?.toString() ?? '',
+            orderId: json['order_id']?.toString() ?? '',
+            amount: _parseAmount(json['amount']),
+            status: _parseStatus(json['status']?.toString() ?? ''),
+            paymentMethod: json['payment_method']?.toString(),
+            transactionId: json['transaction_id']?.toString(),
             paidAt: json['paid_at'] != null
-                ? DateTime.parse(json['paid_at'])
+                ? DateTime.parse(json['paid_at'].toString())
                 : null,
-            createdAt: DateTime.parse(json['created_at']),
+            createdAt: DateTime.parse(json['created_at'].toString()),
           ),
         )
         .toList();
   }
 
-  String _statusToString(PaymentTransactionStatus status) {
-    switch (status) {
-      case PaymentTransactionStatus.pending:
-        return 'pending';
-      case PaymentTransactionStatus.processing:
-        return 'processing';
-      case PaymentTransactionStatus.completed:
-        return 'completed';
-      case PaymentTransactionStatus.failed:
-        return 'failed';
-      case PaymentTransactionStatus.refunded:
-        return 'refunded';
-    }
+  double _parseAmount(Object? value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
   }
 
   PaymentTransactionStatus _parseStatus(String status) {

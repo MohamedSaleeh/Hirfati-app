@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/models/order.dart';
 import '../../../../translations.dart';
 import '../providers/payment_notifier.dart';
-import '../screens/card_payment_screen.dart';
 
 class PaymentDialog extends ConsumerStatefulWidget {
   final Order order;
@@ -20,13 +19,11 @@ class PaymentDialog extends ConsumerStatefulWidget {
 }
 
 class _PaymentDialogState extends ConsumerState<PaymentDialog> {
-  String _selectedMethod = 'cash';
+  String _selectedMethod = 'wallet';
   bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
@@ -98,7 +95,7 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           const Divider(height: 24),
           _buildDetailRow(
             'Total Amount'.i18n,
-            '${widget.order.price} \$',
+            '${widget.order.price} SYP',
             isTotal: true,
           ),
         ],
@@ -222,7 +219,6 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           },
           contentPadding: EdgeInsets.zero,
         ),
-    
       ],
     );
   }
@@ -264,6 +260,8 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   }
 
   Future<void> _processPayment() async {
+    if (_isProcessing) return;
+
     final theme = Theme.of(context);
     setState(() => _isProcessing = true);
 
@@ -272,40 +270,27 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
 
       bool success = false;
 
-      if (_selectedMethod == 'card') {
-        final cardDetails = await Navigator.push<Map<String, dynamic>>(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CardPaymentScreen(amount: widget.order.price),
-          ),
-        );
+      success = await paymentNotifier.processPayment(
+        order: widget.order,
+        paymentMethod: _selectedMethod,
+      );
 
-        if (cardDetails == null) {
-          setState(() => _isProcessing = false);
-          return;
-        }
-
-        success = await paymentNotifier.processPayment(
-          order: widget.order,
-          paymentMethod: _selectedMethod,
-          cardDetails: cardDetails,
-        );
-      }  else {
-        success = await paymentNotifier.processPayment(
-          order: widget.order,
-          paymentMethod: _selectedMethod,
-        );
-      }
-
-      if (success && mounted ) {
+      if (success && mounted) {
         Navigator.pop(context);
         widget.onSuccess();
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_paymentUnavailableMessage(_selectedMethod).i18n),
+            backgroundColor: theme.colorScheme.error,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Payment failed: $e'.i18n),
+            content: Text(_paymentErrorMessage(e).i18n),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -315,5 +300,36 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
         setState(() => _isProcessing = false);
       }
     }
+  }
+
+  String _paymentUnavailableMessage(String method) {
+    switch (method) {
+      case 'cash':
+        return 'Cash payment needs worker confirmation and is not available yet';
+      case 'card':
+        return 'Card payment is not available yet';
+      default:
+        return 'Payment could not be completed';
+    }
+  }
+
+  String _paymentErrorMessage(Object error) {
+    final text = error.toString().toLowerCase();
+    if (text.contains('insufficient_wallet_balance')) {
+      return 'Insufficient wallet balance';
+    }
+    if (text.contains('already_paid') || text.contains('already paid')) {
+      return 'This order is already paid';
+    }
+    if (text.contains('invalid_order_state')) {
+      return 'This order cannot be paid in its current state';
+    }
+    if (text.contains('unauthenticated')) {
+      return 'Please sign in again';
+    }
+    if (text.contains('forbidden') || text.contains('unauthorized')) {
+      return 'You are not allowed to pay this order';
+    }
+    return 'Payment could not be completed';
   }
 }

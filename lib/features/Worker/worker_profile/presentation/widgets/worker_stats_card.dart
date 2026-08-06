@@ -13,15 +13,16 @@ class WorkerStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -45,7 +46,7 @@ class WorkerStatsCard extends StatelessWidget {
                 'completed_jobs'.i18n,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -54,7 +55,7 @@ class WorkerStatsCard extends StatelessWidget {
           Container(
             width: 1,
             height: 40,
-            color: Colors.grey.shade300,
+            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
           ),
           // Working Hours
           Column(
@@ -71,7 +72,7 @@ class WorkerStatsCard extends StatelessWidget {
                 'working_hours'.i18n,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../../core/models/order.dart';
+import '../../../../../core/utils/app_logger.dart';
 import '../../domain/models/worker_dashboard_data.dart';
 import '../../domain/models/worker_order.dart';
 
@@ -346,34 +344,27 @@ class WorkerHomeRemoteDatasourceImpl implements WorkerHomeRemoteDatasource {
     String serviceTitle,
     String workerName,
   ) async {
-    print('🔵 [DEBUG] Sending payment request to client: $clientId');
-
     final title = 'Payment Required 💰';
     final body =
         'Please pay $price SAR for "$serviceTitle" completed by $workerName.';
 
     try {
-      final supabaseUrl = dotenv.env['SUPABASE_URL'];
-      final serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
-
-      final response = await http.post(
-        Uri.parse('$supabaseUrl/functions/v1/send-notification'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $serviceRoleKey',
-        },
-        body: jsonEncode({
+      await client.functions.invoke(
+        'send-notification',
+        body: {
           'userId': clientId,
           'title': title,
           'body': body,
           'type': 'payment_request',
           'orderId': orderId,
-        }),
+        },
       );
-
-      print('🔵 [DEBUG] Payment request response: ${response.statusCode}');
-    } catch (e) {
-      print('❌ Error sending payment request: $e');
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        error,
+        stackTrace: stackTrace,
+        message: 'Unable to send payment request notification',
+      );
     }
   }
 
@@ -385,10 +376,6 @@ class WorkerHomeRemoteDatasourceImpl implements WorkerHomeRemoteDatasource {
     required String workerName,
     required double price,
   }) async {
-    print('🔵 [DEBUG] Sending notification to client: $clientId');
-    print('🔵 [DEBUG] Status: $status');
-    print('🔵 [DEBUG] Service Title: $serviceTitle');
-
     String title;
     String body;
     String notificationType;
@@ -416,44 +403,27 @@ class WorkerHomeRemoteDatasourceImpl implements WorkerHomeRemoteDatasource {
         notificationType = 'order';
         break;
       default:
-        print('⚠️ Unknown status: $status');
+        AppLogger.warning('Skipped notification for unknown order status.');
         return;
     }
 
-    print('🔵 [DEBUG] Title: $title');
-    print('🔵 [DEBUG] Body: $body');
-
     try {
-      final supabaseUrl = dotenv.env['SUPABASE_URL'];
-      final serviceRoleKey = dotenv.env['SUPABASE_SERVICE_ROLE_KEY'];
-
-      print('🔵 [DEBUG] Sending HTTP request to edge function...');
-
-      final response = await http.post(
-        Uri.parse('$supabaseUrl/functions/v1/send-notification'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $serviceRoleKey',
-        },
-        body: jsonEncode({
+      await client.functions.invoke(
+        'send-notification',
+        body: {
           'userId': clientId,
           'title': title,
           'body': body,
           'type': notificationType,
           'orderId': orderId,
-        }),
+        },
       );
-
-      print('🔵 [DEBUG] Response status: ${response.statusCode}');
-      print('🔵 [DEBUG] Response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        print('✅ Notification sent to client: $clientId');
-      } else {
-        print('❌ Failed to send notification: ${response.body}');
-      }
-    } catch (e) {
-      print('❌ Error sending notification: $e');
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        error,
+        stackTrace: stackTrace,
+        message: 'Unable to send order notification',
+      );
     }
   }
 

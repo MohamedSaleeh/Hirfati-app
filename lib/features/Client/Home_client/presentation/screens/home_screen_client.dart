@@ -150,6 +150,9 @@ class _HomeScreenClientState extends ConsumerState<HomeScreenClient> {
                             RecommendedSection(
                               craftsmen: craftsmenToShow,
                               selectedCategoryId: state.selectedCategoryId,
+                              onClearFilter: () => ref
+                                  .read(homeClientProvider.notifier)
+                                  .selectCategory(null),
                             ),
                           const SizedBox(height: 24),
                         ],

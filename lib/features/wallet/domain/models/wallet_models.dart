@@ -35,12 +35,18 @@ class WalletPayment {
   final DateTime? createdAt;
   final DateTime? paidAt;
   final String? userId;
+  final String? payerId;
+  final String? payeeId;
+  final String? transferGroup;
+  final String? parentPaymentId;
   final String? referenceNumber;
   final double fee;
   final Map<String, dynamic>? metadata;
   final String? idempotencyKey;
   final DateTime? updatedAt;
   final String provider;
+  final String currency;
+  final String? createdBy;
 
   const WalletPayment({
     required this.id,
@@ -52,12 +58,18 @@ class WalletPayment {
     this.createdAt,
     this.paidAt,
     this.userId,
+    this.payerId,
+    this.payeeId,
+    this.transferGroup,
+    this.parentPaymentId,
     this.referenceNumber,
     required this.fee,
     this.metadata,
     this.idempotencyKey,
     this.updatedAt,
     required this.provider,
+    this.currency = 'SYP',
+    this.createdBy,
   });
 
   factory WalletPayment.fromJson(Map<String, dynamic> json) {
@@ -70,13 +82,20 @@ class WalletPayment {
       transactionId: _stringOrNull(json['transaction_id']),
       createdAt: parseWalletDate(json['created_at']),
       paidAt: parseWalletDate(json['paid_at']),
-      userId: _stringOrNull(json['user_id']),
+      userId: _stringOrNull(json['user_id']) ?? _stringOrNull(json['payer_id']),
+      payerId:
+          _stringOrNull(json['payer_id']) ?? _stringOrNull(json['user_id']),
+      payeeId: _stringOrNull(json['payee_id']),
+      transferGroup: _stringOrNull(json['transfer_group']),
+      parentPaymentId: _stringOrNull(json['parent_payment_id']),
       referenceNumber: _stringOrNull(json['reference_number']),
       fee: parseWalletNumeric(json['fee']),
       metadata: _mapOrNull(json['metadata']),
       idempotencyKey: _stringOrNull(json['idempotency_key']),
       updatedAt: parseWalletDate(json['updated_at']),
-      provider: _stringOrNull(json['provider']) ?? 'sham_cash_mock',
+      provider: _stringOrNull(json['provider']) ?? 'wallet',
+      currency: _stringOrNull(json['currency']) ?? 'SYP',
+      createdBy: _stringOrNull(json['created_by']),
     );
   }
 
@@ -116,15 +135,113 @@ class WalletPaymentEvent {
   }
 }
 
+class WalletTransaction {
+  final String id;
+  final String walletUserId;
+  final String direction;
+  final String transactionType;
+  final double amount;
+  final double balanceBefore;
+  final double balanceAfter;
+  final String status;
+  final String? orderId;
+  final String? paymentId;
+  final String? withdrawalId;
+  final String? counterpartyUserId;
+  final String? relatedTransactionId;
+  final String? transferGroup;
+  final String idempotencyKey;
+  final String? title;
+  final String? description;
+  final Map<String, dynamic>? metadata;
+  final DateTime? createdAt;
+  final String? createdBy;
+  final String? createdByUserId;
+  final String currency;
+
+  const WalletTransaction({
+    required this.id,
+    required this.walletUserId,
+    required this.direction,
+    required this.transactionType,
+    required this.amount,
+    required this.balanceBefore,
+    required this.balanceAfter,
+    required this.status,
+    this.orderId,
+    this.paymentId,
+    this.withdrawalId,
+    this.counterpartyUserId,
+    this.relatedTransactionId,
+    this.transferGroup,
+    required this.idempotencyKey,
+    this.title,
+    this.description,
+    this.metadata,
+    this.createdAt,
+    this.createdBy,
+    this.createdByUserId,
+    this.currency = 'SYP',
+  });
+
+  factory WalletTransaction.fromJson(Map<String, dynamic> json) {
+    return WalletTransaction(
+      id: json['id']?.toString() ?? '',
+      walletUserId: json['wallet_user_id']?.toString() ?? '',
+      direction: _stringOrNull(json['direction']) ?? 'credit',
+      transactionType: _stringOrNull(json['transaction_type']) ?? 'unknown',
+      amount: parseWalletNumeric(json['amount']),
+      balanceBefore: parseWalletNumeric(json['balance_before']),
+      balanceAfter: parseWalletNumeric(json['balance_after']),
+      status: _stringOrNull(json['status']) ?? 'completed',
+      orderId: _stringOrNull(json['order_id']),
+      paymentId: _stringOrNull(json['payment_id']),
+      withdrawalId: _stringOrNull(json['withdrawal_id']),
+      counterpartyUserId: _stringOrNull(json['counterparty_user_id']),
+      relatedTransactionId: _stringOrNull(json['related_transaction_id']),
+      transferGroup: _stringOrNull(
+        json['transfer_group'] ?? json['transfer_group_id'],
+      ),
+      idempotencyKey: _stringOrNull(json['idempotency_key']) ?? '',
+      title: _stringOrNull(json['title']),
+      description: _stringOrNull(json['description']),
+      metadata: _mapOrNull(json['metadata']),
+      createdAt: parseWalletDate(json['created_at']),
+      createdBy: _stringOrNull(json['created_by']),
+      createdByUserId: _stringOrNull(json['created_by_user_id']),
+      currency: _stringOrNull(json['currency']) ?? 'SYP',
+    );
+  }
+
+  bool get isCredit => direction.toLowerCase() == 'credit';
+  bool get isDebit => direction.toLowerCase() == 'debit';
+
+  double get signedAmount => isDebit ? -amount : amount;
+
+  String get displayStatus {
+    final value = status.trim();
+    if (value.isEmpty) return 'unknown';
+    return value;
+  }
+
+  String get displayTitle {
+    final value = title?.trim();
+    if (value != null && value.isNotEmpty) return value;
+    return transactionType;
+  }
+}
+
 class WalletData {
   final WalletAccount wallet;
   final bool walletExists;
   final List<WalletPayment> payments;
+  final List<WalletTransaction> transactions;
 
   const WalletData({
     required this.wallet,
     required this.walletExists,
     required this.payments,
+    required this.transactions,
   });
 }
 
@@ -214,6 +331,8 @@ bool _isSafeMetadataKey(String key) {
     'reference_number',
     'status',
     'transaction_id',
+    'transfer_group',
+    'currency',
   };
 
   return allowedKeys.contains(normalized);

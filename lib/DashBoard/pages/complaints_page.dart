@@ -24,7 +24,8 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
   Widget build(BuildContext context) {
     final complaints = widget.snapshot.complaints.where((complaint) {
       final q = _query.trim().toLowerCase();
-      final matchesSearch = q.isEmpty ||
+      final matchesSearch =
+          q.isEmpty ||
           complaint.subject.toLowerCase().contains(q) ||
           complaint.message.toLowerCase().contains(q) ||
           complaint.complainantName.toLowerCase().contains(q);
@@ -35,9 +36,11 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
     }).toList();
 
     final highCount = widget.snapshot.complaints
-        .where((complaint) =>
-            complaint.priority == ComplaintPriority.high &&
-            complaint.status != ComplaintDashboardStatus.archived)
+        .where(
+          (complaint) =>
+              complaint.priority == ComplaintPriority.high &&
+              complaint.status != ComplaintDashboardStatus.archived,
+        )
         .length;
     final resolvedCount = widget.snapshot.complaints
         .where(
@@ -141,7 +144,7 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
               DashboardButton(
                 label: 'تصفية',
                 icon: Icons.filter_list,
-                onPressed: () {},
+                onPressed: null,
               ),
               DashboardIconAction(
                 icon: Icons.refresh,
@@ -169,10 +172,12 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
                     DashboardTableFrame(
                       minWidth: 980,
                       child: DataTable(
-                        headingRowColor:
-                            WidgetStateProperty.all(DashboardColors.surfaceAlt),
-                        dataRowColor:
-                            WidgetStateProperty.all(DashboardColors.surface),
+                        headingRowColor: WidgetStateProperty.all(
+                          DashboardColors.surfaceAlt,
+                        ),
+                        dataRowColor: WidgetStateProperty.all(
+                          DashboardColors.surface,
+                        ),
                         columnSpacing: 26,
                         columns: const [
                           DataColumn(label: Text('رقم الشكوى')),
@@ -184,7 +189,8 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
                           DataColumn(label: Text('الإجراءات')),
                         ],
                         rows: complaints.take(10).map((complaint) {
-                          final isResolved = complaint.status ==
+                          final isResolved =
+                              complaint.status ==
                               ComplaintDashboardStatus.archived;
                           return DataRow(
                             cells: [
@@ -194,41 +200,49 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
                               DataCell(
                                 Text(dashboardDate(complaint.createdAt)),
                               ),
-                              DataCell(DashboardBadge(
-                                label:
-                                    complaintPriorityLabel(complaint.priority),
-                                color:
-                                    complaintPriorityColor(complaint.priority),
-                              )),
-                              DataCell(DashboardBadge(
-                                label: complaintStatusLabel(complaint.status),
-                                color: complaintStatusColor(complaint.status),
-                              )),
-                              DataCell(Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  DashboardButton(
-                                    label: 'عرض التفاصيل',
-                                    icon: Icons.visibility_outlined,
-                                    outlined: true,
-                                    onPressed: () => _showDetails(complaint),
+                              DataCell(
+                                DashboardBadge(
+                                  label: complaintPriorityLabel(
+                                    complaint.priority,
                                   ),
-                                  const SizedBox(width: 8),
-                                  DashboardIconAction(
-                                    icon: isResolved
-                                        ? Icons.undo
-                                        : Icons.check_circle_outline,
-                                    tooltip: isResolved
-                                        ? 'إعادة فتح'
-                                        : 'وضع كمحلولة',
-                                    color: isResolved
-                                        ? DashboardColors.warning
-                                        : DashboardColors.success,
-                                    onPressed: () =>
-                                        _toggleComplaintResolved(complaint),
+                                  color: complaintPriorityColor(
+                                    complaint.priority,
                                   ),
-                                ],
-                              )),
+                                ),
+                              ),
+                              DataCell(
+                                DashboardBadge(
+                                  label: complaintStatusLabel(complaint.status),
+                                  color: complaintStatusColor(complaint.status),
+                                ),
+                              ),
+                              DataCell(
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    DashboardButton(
+                                      label: 'عرض التفاصيل',
+                                      icon: Icons.visibility_outlined,
+                                      outlined: true,
+                                      onPressed: () => _showDetails(complaint),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    DashboardIconAction(
+                                      icon: isResolved
+                                          ? Icons.undo
+                                          : Icons.check_circle_outline,
+                                      tooltip: isResolved
+                                          ? 'إعادة فتح'
+                                          : 'وضع كمحلولة',
+                                      color: isResolved
+                                          ? DashboardColors.warning
+                                          : DashboardColors.success,
+                                      onPressed: () =>
+                                          _toggleComplaintResolved(complaint),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           );
                         }).toList(),
@@ -251,7 +265,9 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
   Future<void> _toggleComplaintResolved(DashboardComplaint complaint) async {
     final isResolved = complaint.status == ComplaintDashboardStatus.archived;
     try {
-      await ref.read(dashboardAdminServiceProvider).setComplaintResolved(
+      await ref
+          .read(dashboardAdminServiceProvider)
+          .setComplaintResolved(
             complaintId: complaint.id,
             isResolved: !isResolved,
           );
@@ -308,9 +324,9 @@ class _ComplaintsPageState extends ConsumerState<ComplaintsPage> {
   String _shortId(String id) => id.length > 8 ? id.substring(0, 8) : id;
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -375,10 +391,7 @@ class _SubjectCell extends StatelessWidget {
           Text(
             complaint.message,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: DashboardColors.muted,
-              fontSize: 11,
-            ),
+            style: const TextStyle(color: DashboardColors.muted, fontSize: 11),
           ),
         ],
       ),

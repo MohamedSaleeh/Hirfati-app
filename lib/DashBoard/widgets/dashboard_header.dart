@@ -18,9 +18,7 @@ class DashboardHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       decoration: const BoxDecoration(
         color: DashboardColors.background,
-        border: Border(
-          bottom: BorderSide(color: Color(0x141D2B3D)),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0x141D2B3D))),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -57,7 +55,7 @@ class DashboardHeader extends StatelessWidget {
                   width: 270,
                   child: DashboardSearchField(
                     hint: 'بحث سريع...',
-                    onChanged: (_) {},
+                    onChanged: null,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -65,7 +63,7 @@ class DashboardHeader extends StatelessWidget {
               DashboardIconAction(
                 icon: Icons.notifications_none,
                 tooltip: 'الإشعارات',
-                onPressed: () {},
+                onPressed: null,
                 color: DashboardColors.primary,
               ),
             ],
@@ -78,29 +76,29 @@ class DashboardHeader extends StatelessWidget {
   _HeaderMeta _sectionMeta(DashboardSection section) {
     return switch (section) {
       DashboardSection.overview => const _HeaderMeta(
-          'نظرة عامة',
-          'مرحباً بك مجدداً، إليك ما يحدث اليوم في منصتك.',
-        ),
+        'نظرة عامة',
+        'مرحباً بك مجدداً، إليك ما يحدث اليوم في منصتك.',
+      ),
       DashboardSection.users => const _HeaderMeta(
-          'إدارة المستخدمين',
-          'استعرض وقم بإدارة حسابات العملاء والحرفيين.',
-        ),
+        'إدارة المستخدمين',
+        'استعرض وقم بإدارة حسابات العملاء والحرفيين.',
+      ),
       DashboardSection.verification => const _HeaderMeta(
-          'طلبات التوثيق المعلقة',
-          'راجع واعتمد طلبات الحرفيين الجدد للانضمام للمنصة.',
-        ),
+        'طلبات التوثيق المعلقة',
+        'راجع واعتمد طلبات الحرفيين الجدد للانضمام للمنصة.',
+      ),
       DashboardSection.complaints => const _HeaderMeta(
-          'إدارة الشكاوى',
-          'عرض ومعالجة النزاعات بين العملاء والحرفيين.',
-        ),
+        'إدارة الشكاوى',
+        'عرض ومعالجة النزاعات بين العملاء والحرفيين.',
+      ),
       DashboardSection.deletions => const _HeaderMeta(
-          'سجل المحذوفات',
-          'سجل تدقيق كامل للحسابات المحذوفة من المنصة.',
-        ),
+        'سجل المحذوفات',
+        'سجل تدقيق كامل للحسابات المحذوفة من المنصة.',
+      ),
       DashboardSection.settings => const _HeaderMeta(
-          'الإعدادات العامة',
-          'تخصيص إعدادات المنصة وإدارة التنبيهات.',
-        ),
+        'الإعدادات العامة',
+        'تخصيص إعدادات المنصة وإدارة التنبيهات.',
+      ),
     };
   }
 }

@@ -45,9 +45,9 @@ class WalletScreen extends ConsumerWidget {
               children: [
                 _WalletBalanceCard(data: data),
                 const SizedBox(height: 24),
-                _PaymentHistorySection(
-                  payments: data.payments,
-                  onPaymentTap: (payment) {
+                _TransactionHistorySection(
+                  transactions: data.transactions,
+                  onTransactionTap: (transaction) {
                     showModalBottomSheet<void>(
                       context: context,
                       isScrollControlled: true,
@@ -58,7 +58,8 @@ class WalletScreen extends ConsumerWidget {
                           top: Radius.circular(24),
                         ),
                       ),
-                      builder: (_) => _PaymentDetailsSheet(payment: payment),
+                      builder: (_) =>
+                          _TransactionDetailsSheet(transaction: transaction),
                     );
                   },
                 ),
@@ -167,13 +168,13 @@ class _WalletBalanceCard extends StatelessWidget {
   }
 }
 
-class _PaymentHistorySection extends StatelessWidget {
-  final List<WalletPayment> payments;
-  final ValueChanged<WalletPayment> onPaymentTap;
+class _TransactionHistorySection extends StatelessWidget {
+  final List<WalletTransaction> transactions;
+  final ValueChanged<WalletTransaction> onTransactionTap;
 
-  const _PaymentHistorySection({
-    required this.payments,
-    required this.onPaymentTap,
+  const _TransactionHistorySection({
+    required this.transactions,
+    required this.onTransactionTap,
   });
 
   @override
@@ -185,17 +186,17 @@ class _PaymentHistorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Payment history'.i18n,
+          'Wallet activity'.i18n,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
-        if (payments.isEmpty)
+        if (transactions.isEmpty)
           _WalletEmptyState(
             icon: Icons.receipt_long_outlined,
-            title: 'No payments yet'.i18n,
-            subtitle: 'Payments will appear here after checkout'.i18n,
+            title: 'No wallet activity yet'.i18n,
+            subtitle: 'Wallet transactions will appear here'.i18n,
           )
         else
           Container(
@@ -206,17 +207,17 @@ class _PaymentHistorySection extends StatelessWidget {
             child: ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: payments.length,
+              itemCount: transactions.length,
               separatorBuilder: (context, index) => Divider(
                 height: 1,
                 indent: 72,
                 color: colorScheme.surfaceContainerHighest,
               ),
               itemBuilder: (context, index) {
-                final payment = payments[index];
-                return _PaymentTile(
-                  payment: payment,
-                  onTap: () => onPaymentTap(payment),
+                final transaction = transactions[index];
+                return _TransactionTile(
+                  transaction: transaction,
+                  onTap: () => onTransactionTap(transaction),
                 );
               },
             ),
@@ -226,11 +227,11 @@ class _PaymentHistorySection extends StatelessWidget {
   }
 }
 
-class _PaymentTile extends StatelessWidget {
-  final WalletPayment payment;
+class _TransactionTile extends StatelessWidget {
+  final WalletTransaction transaction;
   final VoidCallback onTap;
 
-  const _PaymentTile({required this.payment, required this.onTap});
+  const _TransactionTile({required this.transaction, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -244,20 +245,17 @@ class _PaymentTile extends StatelessWidget {
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: _statusColor(
-            payment.displayStatus,
-            theme,
-          ).withValues(alpha: 0.1),
+          color: _transactionColor(transaction, theme).withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
-          Icons.receipt_long_outlined,
-          color: _statusColor(payment.displayStatus, theme),
+          _transactionIcon(transaction),
+          color: _transactionColor(transaction, theme),
           size: 22,
         ),
       ),
       title: Text(
-        _paymentTitle(payment),
+        _transactionTitle(transaction),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.titleMedium?.copyWith(
@@ -270,17 +268,17 @@ class _PaymentTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _formatDateOrUnknown(payment.createdAt),
+              _formatDateOrUnknown(transaction.createdAt),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            if (payment.referenceNumber != null) ...[
+            if (transaction.orderId != null) ...[
               const SizedBox(height: 4),
               Text(
-                '${'Reference Number'.i18n}: ${payment.referenceNumber}',
+                '${'Order ID'.i18n}: ${transaction.orderId}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -288,10 +286,10 @@ class _PaymentTile extends StatelessWidget {
                 ),
               ),
             ],
-            if (payment.fee > 0) ...[
+            if (transaction.description != null) ...[
               const SizedBox(height: 4),
               Text(
-                '${'Fee'.i18n}: ${_formatAmount(payment.fee)}',
+                transaction.description!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -300,7 +298,7 @@ class _PaymentTile extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 8),
-            _StatusChip(status: payment.displayStatus),
+            _StatusChip(status: transaction.displayStatus),
           ],
         ),
       ),
@@ -309,9 +307,9 @@ class _PaymentTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            _formatAmount(payment.amount),
+            _formatSignedAmount(transaction.signedAmount, transaction.currency),
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface,
+              color: _transactionColor(transaction, theme),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -327,17 +325,18 @@ class _PaymentTile extends StatelessWidget {
   }
 }
 
-class _PaymentDetailsSheet extends ConsumerWidget {
-  final WalletPayment payment;
+class _TransactionDetailsSheet extends ConsumerWidget {
+  final WalletTransaction transaction;
 
-  const _PaymentDetailsSheet({required this.payment});
+  const _TransactionDetailsSheet({required this.transaction});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final eventsAsync = ref.watch(paymentEventsProvider(payment.id));
-    final safeMetadata = safeWalletMetadataFields(payment.metadata);
+    final paymentId = transaction.paymentId;
+    final eventsAsync = ref.watch(paymentEventsProvider(paymentId ?? ''));
+    final safeMetadata = safeWalletMetadataFields(transaction.metadata);
 
     return DraggableScrollableSheet(
       expand: false,
@@ -370,14 +369,14 @@ class _PaymentDetailsSheet extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.receipt_long_outlined,
+                    _transactionIcon(transaction),
                     color: colorScheme.onPrimaryContainer,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Payment details'.i18n,
+                    'Transaction details'.i18n,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -389,58 +388,67 @@ class _PaymentDetailsSheet extends ConsumerWidget {
             _DetailRow(
               icon: Icons.attach_money,
               label: 'Amount'.i18n,
-              value: _formatAmount(payment.amount),
+              value: _formatSignedAmount(
+                transaction.signedAmount,
+                transaction.currency,
+              ),
               highlighted: true,
             ),
             _DetailRow(
-              icon: Icons.payments_outlined,
-              label: 'Fee'.i18n,
-              value: _formatAmount(payment.fee),
+              icon: Icons.swap_vert,
+              label: 'Direction'.i18n,
+              value: _formatEnumLabel(transaction.direction),
+            ),
+            _DetailRow(
+              icon: Icons.category_outlined,
+              label: 'Transaction Type'.i18n,
+              value: _formatEnumLabel(transaction.transactionType),
+            ),
+            _DetailRow(
+              icon: Icons.account_balance_wallet_outlined,
+              label: 'Balance before'.i18n,
+              value: _formatAmount(
+                transaction.balanceBefore,
+                transaction.currency,
+              ),
+            ),
+            _DetailRow(
+              icon: Icons.account_balance_wallet,
+              label: 'Balance after'.i18n,
+              value: _formatAmount(
+                transaction.balanceAfter,
+                transaction.currency,
+              ),
             ),
             _DetailRow(
               icon: Icons.info_outline,
               label: 'Status'.i18n,
-              value: _statusLabel(payment.displayStatus),
-            ),
-            _DetailRow(
-              icon: Icons.credit_card,
-              label: 'Payment Method'.i18n,
-              value: _nullableLabel(payment.paymentMethod),
-            ),
-            _DetailRow(
-              icon: Icons.business,
-              label: 'Provider'.i18n,
-              value: _formatEnumLabel(payment.provider),
-            ),
-            _DetailRow(
-              icon: Icons.confirmation_number_outlined,
-              label: 'Reference Number'.i18n,
-              value: payment.referenceNumber,
-            ),
-            _DetailRow(
-              icon: Icons.qr_code,
-              label: 'Transaction ID'.i18n,
-              value: payment.transactionId,
+              value: _statusLabel(transaction.displayStatus),
             ),
             _DetailRow(
               icon: Icons.calendar_today_outlined,
               label: 'Created at'.i18n,
-              value: _formatDateOrNull(payment.createdAt),
-            ),
-            _DetailRow(
-              icon: Icons.event_available_outlined,
-              label: 'Paid at'.i18n,
-              value: _formatDateOrNull(payment.paidAt),
+              value: _formatDateOrNull(transaction.createdAt),
             ),
             _DetailRow(
               icon: Icons.shopping_bag_outlined,
               label: 'Order ID'.i18n,
-              value: payment.orderId,
+              value: transaction.orderId,
+            ),
+            _DetailRow(
+              icon: Icons.payments_outlined,
+              label: 'Payment ID'.i18n,
+              value: transaction.paymentId,
+            ),
+            _DetailRow(
+              icon: Icons.account_balance,
+              label: 'Withdrawal ID'.i18n,
+              value: transaction.withdrawalId,
             ),
             _DetailRow(
               icon: Icons.support_agent,
-              label: 'Payment ID'.i18n,
-              value: payment.id,
+              label: 'Ledger ID'.i18n,
+              value: transaction.id,
             ),
             if (safeMetadata.isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -454,37 +462,39 @@ class _PaymentDetailsSheet extends ConsumerWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 16),
-            _SheetSectionTitle(title: 'Payment events'.i18n),
-            const SizedBox(height: 8),
-            eventsAsync.when(
-              data: (events) {
-                if (events.isEmpty) {
-                  return Text(
-                    'No payment events yet'.i18n,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  );
-                }
+            if (paymentId != null) ...[
+              const SizedBox(height: 16),
+              _SheetSectionTitle(title: 'Payment events'.i18n),
+              const SizedBox(height: 8),
+              eventsAsync.when(
+                data: (events) {
+                  if (events.isEmpty) {
+                    return Text(
+                      'No payment events yet'.i18n,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    );
+                  }
 
-                return Column(
-                  children: events
-                      .map((event) => _PaymentEventTile(event: event))
-                      .toList(),
-                );
-              },
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: LinearProgressIndicator(minHeight: 2),
-              ),
-              error: (error, stackTrace) => Text(
-                'Unable to load payment events'.i18n,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.error,
+                  return Column(
+                    children: events
+                        .map((event) => _PaymentEventTile(event: event))
+                        .toList(),
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: LinearProgressIndicator(minHeight: 2),
+                ),
+                error: (error, stackTrace) => Text(
+                  'Unable to load payment events'.i18n,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.error,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         );
       },
@@ -734,14 +744,23 @@ class _WalletErrorState extends StatelessWidget {
   }
 }
 
-String _formatAmount(double amount) {
+String _formatAmount(double amount, [String currency = 'SYP']) {
   final normalized = amount.abs() < 0.005 ? 0.0 : amount;
   final rounded = normalized.roundToDouble();
   final amountText = (normalized - rounded).abs() < 0.005
       ? normalized.toStringAsFixed(0)
       : normalized.toStringAsFixed(2);
 
-  return '$amountText \$';
+  return '$amountText $currency';
+}
+
+String _formatSignedAmount(double amount, [String currency = 'SYP']) {
+  final prefix = amount > 0
+      ? '+'
+      : amount < 0
+      ? '-'
+      : '';
+  return '$prefix${_formatAmount(amount.abs(), currency)}';
 }
 
 String _formatDate(DateTime date) {
@@ -756,23 +775,6 @@ String _formatDateOrUnknown(DateTime? date) {
 String? _formatDateOrNull(DateTime? date) {
   if (date == null) return null;
   return _formatDate(date);
-}
-
-String _paymentTitle(WalletPayment payment) {
-  if (payment.paymentMethod != null) {
-    return _formatEnumLabel(payment.paymentMethod!);
-  }
-
-  if (payment.provider.trim().isNotEmpty) {
-    return _formatEnumLabel(payment.provider);
-  }
-
-  return 'Payment'.i18n;
-}
-
-String _nullableLabel(String? value) {
-  if (value == null || value.trim().isEmpty) return 'Unknown'.i18n;
-  return _formatEnumLabel(value);
 }
 
 String _statusLabel(String status) {
@@ -816,6 +818,29 @@ Color _statusColor(String status, ThemeData theme) {
   }
 }
 
+String _transactionTitle(WalletTransaction transaction) {
+  final title = transaction.displayTitle.trim();
+  if (title.isEmpty) return 'Wallet transaction'.i18n;
+  return _formatEnumLabel(title);
+}
+
+IconData _transactionIcon(WalletTransaction transaction) {
+  final type = transaction.transactionType.toLowerCase();
+  if (type.contains('withdrawal')) return Icons.account_balance_outlined;
+  if (type.contains('refund')) return Icons.undo;
+  if (transaction.isDebit) return Icons.arrow_upward;
+  return Icons.arrow_downward;
+}
+
+Color _transactionColor(WalletTransaction transaction, ThemeData theme) {
+  final colorScheme = theme.colorScheme;
+  if (transaction.displayStatus.toLowerCase() == 'failed') {
+    return colorScheme.error;
+  }
+  if (transaction.isDebit) return colorScheme.error;
+  return colorScheme.tertiary;
+}
+
 String _metadataLabel(String key) {
   switch (key.toLowerCase()) {
     case 'amount':
@@ -834,6 +859,8 @@ String _metadataLabel(String key) {
       return 'Status'.i18n;
     case 'transaction_id':
       return 'Transaction ID'.i18n;
+    case 'transaction_type':
+      return 'Transaction Type'.i18n;
     default:
       return _formatEnumLabel(key);
   }

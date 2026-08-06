@@ -49,8 +49,12 @@ class EarningsNotifier
       final recentTransactions = results[1] as List<TransactionModel>;
       final withdrawalHistory = results[2] as List<TransactionModel>;
 
-      // دمج القائمتين وترتيبهما حسب التاريخ
-      final allTransactions = [...recentTransactions, ...withdrawalHistory];
+      final transactionsById = <String, TransactionModel>{};
+      for (final transaction in [...recentTransactions, ...withdrawalHistory]) {
+        transactionsById[transaction.id] = transaction;
+      }
+
+      final allTransactions = transactionsById.values.toList();
       allTransactions.sort((a, b) => b.date.compareTo(a.date));
 
       if (!_isDisposed) {
@@ -65,17 +69,13 @@ class EarningsNotifier
     }
   }
 
-
-
   // ⚠️ دالة السحب القديمة (معطلة)
   Future<void> requestWithdrawal({
     required double amount,
     required String bankName,
     required String accountNumber,
   }) async {
-    throw Exception(
-      'This withdrawal method is temporarily disabled. Please use "Withdraw to Sham Cash" instead.',
-    );
+    throw Exception('Withdrawals are temporarily disabled.');
   }
 }
 

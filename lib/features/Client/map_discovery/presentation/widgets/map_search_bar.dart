@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../translations.dart';
@@ -12,11 +14,22 @@ class MapSearchBar extends ConsumerStatefulWidget {
 
 class _MapSearchBarState extends ConsumerState<MapSearchBar> {
   final _controller = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted) {
+        ref.read(searchQueryProvider.notifier).state = value;
+      }
+    });
   }
 
   @override
@@ -42,9 +55,7 @@ class _MapSearchBarState extends ConsumerState<MapSearchBar> {
             ),
             child: TextField(
               controller: _controller,
-              onChanged: (val) {
-                ref.read(searchQueryProvider.notifier).state = val;
-              },
+              onChanged: _onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'Search for services...'.i18n,
                 hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),

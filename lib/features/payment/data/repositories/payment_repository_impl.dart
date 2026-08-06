@@ -48,36 +48,23 @@ class PaymentRepositoryImpl implements PaymentRepository {
   }
 
   @override
+  Future<PaymentSettlementResult> settleOrderPayment({
+    required String orderId,
+    required String paymentMethod,
+    required String idempotencyKey,
+    String? providerTransactionId,
+  }) async {
+    return _datasource.settleOrderPayment(
+      orderId: orderId,
+      paymentMethod: paymentMethod,
+      idempotencyKey: idempotencyKey,
+      providerTransactionId: providerTransactionId,
+    );
+  }
+
+  @override
   Future<bool> processCashPayment(String orderId, double amount) async {
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) {
-        print('❌ User not authenticated');
-        return false;
-      }
-
-      print('💰 Processing cash payment for order: $orderId');
-      print('   - Amount: $amount');
-      print('   - UserId: $userId');
-
-      final payment = await _datasource.createPayment(
-        orderId: orderId,
-        amount: amount,
-        userId: userId,
-        paymentMethod: 'cash',
-      );
-
-      await _datasource.updatePaymentStatus(
-        payment.id,
-        PaymentTransactionStatus.completed,
-      );
-
-      print('✅ Cash payment recorded successfully');
-      return true;
-    } catch (e) {
-      print('❌ Error processing cash payment: $e');
-      return false;
-    }
+    return false;
   }
 
   @override
@@ -86,82 +73,22 @@ class PaymentRepositoryImpl implements PaymentRepository {
     double amount,
     Map<String, dynamic> cardDetails,
   ) async {
-    try {
-      // ✅ جلب userId الحالي
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) {
-        print('❌ User not authenticated');
-        return false;
-      }
-
-      print('💳 Processing card payment for order: $orderId');
-      print('   - Amount: $amount');
-      print('   - UserId: $userId');
-
-      // إنشاء سجل دفع
-      final payment = await _datasource.createPayment(
-        orderId: orderId,
-        amount: amount,
-        userId: userId, // ✅ تمرير userId الصحيح
-        paymentMethod: 'card',
-      );
-
-      // تحديث الحالة إلى processing
-      await _datasource.updatePaymentStatus(
-        payment.id,
-        PaymentTransactionStatus.processing,
-      );
-
-      // محاكاة معالجة الدفع
-      await Future.delayed(const Duration(seconds: 2));
-
-      // محاكاة نجاح الدفع
-      final transactionId = 'txn_${DateTime.now().millisecondsSinceEpoch}';
-      await _datasource.updatePaymentStatus(
-        payment.id,
-        PaymentTransactionStatus.completed,
-        transactionId: transactionId,
-      );
-
-      print('✅ Card payment processed successfully');
-      return true;
-    } catch (e) {
-      print('❌ Error processing card payment: $e');
-      return false;
-    }
+    return false;
   }
 
   @override
   Future<bool> processWalletPayment(String orderId, double amount) async {
-    try {
-      // ✅ جلب userId الحالي
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) {
-        print('❌ User not authenticated');
-        return false;
-      }
-
-      print('👛 Processing wallet payment for order: $orderId');
-      print('   - Amount: $amount');
-      print('   - UserId: $userId');
-
-      final payment = await _datasource.createPayment(
-        orderId: orderId,
-        amount: amount,
-        userId: userId, 
-        paymentMethod: 'wallet',
-      );
-
-      await _datasource.updatePaymentStatus(
-        payment.id,
-        PaymentTransactionStatus.completed,
-      );
-
-      print('✅ Wallet payment processed successfully');
-      return true;
-    } catch (e) {
-      print('❌ Error processing wallet payment: $e');
-      return false;
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      throw Exception('unauthenticated');
     }
+
+    final result = await settleOrderPayment(
+      orderId: orderId,
+      paymentMethod: 'wallet',
+      idempotencyKey: 'order:$orderId:wallet:user:$userId',
+    );
+
+    return result.success;
   }
 }

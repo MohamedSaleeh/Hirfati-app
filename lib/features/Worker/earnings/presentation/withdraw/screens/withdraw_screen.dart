@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import '../../../../../../translations.dart';
-import '../../providers/earnings_provider.dart';
 import '../widgets/withdraw_balance_card.dart';
 import '../widgets/withdraw_quick_amounts.dart';
 import '../widgets/withdraw_form_field.dart';
@@ -64,81 +63,15 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
   }
 
   Future<void> _submit() async {
-    if (_form.invalid) {
-      _form.markAllAsTouched();
-      return;
-    }
-
-    final amount = _form.control('amount').value as double;
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('confirm withdrawal'.i18n),
-        content: Text(
-          'withdraw confirmation'.i18n.replaceAll(
-            '{amount}',
-            '\$${amount.toStringAsFixed(0)}',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('cancel'.i18n),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onSecondary,
-            ),
-            child: Text('confirm'.i18n),
-          ),
-        ],
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Withdrawal is currently unavailable'.i18n),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
-
-    if (confirmed != true) return;
-
-    setState(() => _isSubmitting = true);
-
-    try {
-      final notifier = ref.read(earningsProvider.notifier);
-      await notifier.requestWithdrawal(
-        amount: amount,
-        bankName: _form.control('bankName').value as String,
-        accountNumber: _form.control('accountNumber').value as String,
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Withdrawal request submitted successfully'.i18n),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-        context.pop(true);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'.i18n),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-      }
-    } finally {
-      setState(() => _isSubmitting = false);
-    }
   }
 
   @override
@@ -324,7 +257,7 @@ class _WithdrawScreenState extends ConsumerState<WithdrawScreen> {
                           ),
                         )
                       : Text(
-                          'confirm withdrawal'.i18n,
+                          'Withdrawal is currently unavailable'.i18n,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

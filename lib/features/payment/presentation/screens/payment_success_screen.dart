@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart' hide DateUtils;
 import 'package:flutter/services.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import '../../../../translations.dart';
 import '../../../../core/utils/date_utils.dart';
 
@@ -60,7 +58,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.colorScheme.primaryContainer,
       body: SafeArea(
@@ -140,7 +138,10 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.receipt, color: theme.colorScheme.primary),
+                              Icon(
+                                Icons.receipt,
+                                color: theme.colorScheme.primary,
+                              ),
                               const SizedBox(width: 12),
                               Text(
                                 'Payment Receipt'.i18n,
@@ -174,7 +175,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                               _buildDetailRow(
                                 icon: Icons.attach_money,
                                 label: 'Amount'.i18n,
-                                value: '${widget.amount} \$',
+                                value: '${widget.amount} SYP',
                                 isHighlighted: true,
                               ),
                               const Divider(height: 24),
@@ -208,14 +209,23 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                   child: Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _downloadPDF,
-                          icon: const Icon(Icons.download),
-                          label: Text('Download PDF'.i18n),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        child: ClipRRect(
+                          child: Banner(
+                            message: 'Soon '.i18n,
+                            location: BannerLocation.topEnd,
+                            color: theme.colorScheme.secondary,
+                            child: OutlinedButton.icon(
+                              onPressed: null,
+                              icon: const Icon(Icons.download),
+                              label: Text('Download PDF'.i18n),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -228,12 +238,14 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                             location: BannerLocation.topEnd,
                             color: theme.colorScheme.secondary,
                             child: OutlinedButton.icon(
-                              onPressed: () {},
+                              onPressed: null,
                               icon: const Icon(Icons.share),
                               label: Text('Share'.i18n),
                               style: OutlinedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                                foregroundColor: theme.colorScheme.onSurfaceVariant,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainerHighest,
+                                foregroundColor:
+                                    theme.colorScheme.onSurfaceVariant,
                                 enableFeedback: false,
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 14,
@@ -289,7 +301,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     bool isHighlighted = false,
   }) {
     final theme = Theme.of(context);
-    
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -314,8 +326,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                   fontWeight: isHighlighted
                       ? FontWeight.bold
                       : FontWeight.normal,
-                  color: isHighlighted 
-                      ? theme.colorScheme.primary 
+                  color: isHighlighted
+                      ? theme.colorScheme.primary
                       : theme.colorScheme.onSurface,
                 ),
               ),
@@ -345,124 +357,5 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         ),
       );
     }
-  }
-
-  Future<void> _downloadPDF() async {
-    final theme = Theme.of(context);
-    try {
-      final pdf = pw.Document();
-
-      pdf.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          build: (context) => [
-            _buildPDFHeader(),
-            _buildPDFDivider(),
-            _buildPDFDetails(),
-            _buildPDFDivider(),
-            _buildPDFFooter(),
-          ],
-        ),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('PDF generation will be available soon'.i18n),
-          backgroundColor: theme.colorScheme.primary,
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error generating PDF: $e'.i18n),
-            backgroundColor: theme.colorScheme.error,
-          ),
-        );
-      }
-    }
-  }
-
-  pw.Widget _buildPDFHeader() {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          'Hirfati',
-          style: pw.TextStyle(
-            fontSize: 24,
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.teal,
-          ),
-        ),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          'Payment Receipt',
-          style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.SizedBox(height: 16),
-        pw.Text(
-          'Thank you for your payment!',
-          style: pw.TextStyle(fontSize: 12, color: PdfColors.grey),
-        ),
-      ],
-    );
-  }
-
-  pw.Widget _buildPDFDetails() {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        _buildPDFRow('Transaction ID:', widget.transactionId),
-        _buildPDFRow('Reference Number:', widget.referenceNumber),
-        _buildPDFRow('Amount:', '${widget.amount} \$'),
-        _buildPDFRow('Worker:', widget.workerName),
-        _buildPDFRow('Service:', widget.serviceTitle),
-        _buildPDFRow('Order ID:', widget.orderId),
-        _buildPDFRow('Payment Date:', DateUtils.formatDateTime(widget.paidAt)),
-      ],
-    );
-  }
-
-  pw.Widget _buildPDFRow(String label, String value) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 4),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(
-            label,
-            style: pw.TextStyle(fontSize: 12, color: PdfColors.grey),
-          ),
-          pw.Text(
-            value,
-            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  pw.Widget _buildPDFFooter() {
-    return pw.Column(
-      children: [
-        pw.Divider(),
-        pw.SizedBox(height: 16),
-        pw.Text(
-          'Thank you for choosing Hirfati!',
-          style: pw.TextStyle(fontSize: 10, color: PdfColors.grey),
-        ),
-        pw.SizedBox(height: 4),
-        pw.Text(
-          'www.hirfati.com',
-          style: pw.TextStyle(fontSize: 10, color: PdfColors.blue),
-        ),
-      ],
-    );
-  }
-
-  pw.Widget _buildPDFDivider() {
-    return pw.Divider(thickness: 0.5, color: PdfColors.grey300);
   }
 }

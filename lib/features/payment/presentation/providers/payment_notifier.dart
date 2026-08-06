@@ -1,18 +1,14 @@
 // lib/features/payment/presentation/providers/payment_notifier.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/models/order.dart';
 import '../../domain/repositories/payment_repository.dart';
 import '../providers/payment_providers.dart';
-import '../../../Client/orders/data/datasources/orders_supabase_datasource.dart';
 
 class PaymentNotifier extends StateNotifier<AsyncValue<bool>> {
   final PaymentRepository _paymentRepository;
-  final OrdersSupabaseDatasource _ordersDatasource;
 
-  PaymentNotifier(this._paymentRepository, this._ordersDatasource)
-    : super(const AsyncData(false));
+  PaymentNotifier(this._paymentRepository) : super(const AsyncData(false));
 
   Future<bool> processPayment({
     required Order order,
@@ -21,19 +17,6 @@ class PaymentNotifier extends StateNotifier<AsyncValue<bool>> {
   }) async {
     state = const AsyncLoading();
 
-    print('💰 Processing payment:');
-    print('   - Order ID: ${order.id}');
-    print('   - Amount: ${order.price}');
-    print('   - Method: $paymentMethod');
-
-    // تحقق من وجود الطلب
-    final orderCheck = await _ordersDatasource.getOrderById(order.id);
-    print('   - Order exists: ${orderCheck != null}');
-    if (orderCheck != null) {
-      print('   - Order price from DB: ${orderCheck.price}');
-      print('   - Order status: ${orderCheck.status}');
-      print('   - Order payment status: ${orderCheck.paymentStatus}');
-    }
     try {
       bool success = false;
 
@@ -64,24 +47,11 @@ class PaymentNotifier extends StateNotifier<AsyncValue<bool>> {
           throw Exception('Unknown payment method');
       }
 
-      if (success) {
-        // ✅ تحديث حالة الدفع مباشرة باستخدام Datasource
-        await _ordersDatasource.updatePaymentStatus(
-          order.id,
-          PaymentStatus.paid,
-          paymentMethod: paymentMethod,
-          transactionId: 'txn_${DateTime.now().millisecondsSinceEpoch}',
-        );
-
-        state = const AsyncData(true);
-        return true;
-      }
-
-      state = const AsyncData(false);
-      return false;
+      state = AsyncData(success);
+      return success;
     } catch (e, st) {
       state = AsyncError(e, st);
-      return false;
+      rethrow;
     }
   }
 
@@ -90,14 +60,8 @@ class PaymentNotifier extends StateNotifier<AsyncValue<bool>> {
   }
 }
 
-final ordersDatasourceProvider = Provider<OrdersSupabaseDatasource>((ref) {
-  final supabase = Supabase.instance.client;
-  return OrdersSupabaseDatasource(supabase);
-});
-
 final paymentNotifierProvider =
     StateNotifierProvider<PaymentNotifier, AsyncValue<bool>>((ref) {
       final paymentRepository = ref.watch(paymentRepositoryProvider);
-      final ordersDatasource = ref.watch(ordersDatasourceProvider);
-      return PaymentNotifier(paymentRepository, ordersDatasource);
+      return PaymentNotifier(paymentRepository);
     });

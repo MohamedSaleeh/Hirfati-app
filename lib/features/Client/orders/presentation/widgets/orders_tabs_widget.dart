@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import '../../../../../core/models/order.dart';
 import '../../../../../translations.dart';
@@ -44,7 +45,7 @@ class OrdersTabsWidget extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => context.go('/'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: theme.colorScheme.onPrimary,

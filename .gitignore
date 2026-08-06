@@ -100,13 +100,20 @@ migrate_working_dir/
 
 # ملف الخدمة لحساب Firebase (يمنع منعاً باتاً رفعه!)
 firebase-service-account.json
+*-service-account.json
+service-account*.json
+google-services-private.json
 
 # أي ملف آخر يحتوي على مفاتيح أو شهادات
 *.pem
 *.key
+*.p8
+*.p12
 *.keystore
 *.jks
 key.properties
+secrets/
+generated-secrets/
 
 # ============================================
 #  الجزء 6: ملفات Supabase الخاصة

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../../translations.dart';
+import '../../../Home_client/domain_models/craftsman_model.dart';
 import '../providers/map_providers.dart';
 import '../widgets/map_category_chips.dart';
 import '../widgets/map_craftsman_card.dart';
@@ -30,25 +31,41 @@ class _MapDiscoveryScreenState extends ConsumerState<MapDiscoveryScreen> {
     super.dispose();
   }
 
-  void _onMarkerTapped(String workerId, int index) async {
+  void _onMarkerTapped(String workerId, int index) {
     ref.read(selectedMarkerProvider.notifier).state = workerId;
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+    if (!_pageController.hasClients) return;
+
+    unawaited(
+      _pageController
+          .animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          )
+          .catchError((_) {
+            // The page view can detach while filters rebuild the map cards.
+          }),
     );
   }
 
-  Future<void> _onPageChanged(int index, List workers) async {
-    if (workers.isEmpty) return;
-    final worker = workers[index];
-    ref.read(selectedMarkerProvider.notifier).state = worker.id;
+  Future<void> _onPageChanged(int index, List<CraftsmanModel> workers) async {
+    try {
+      if (workers.isEmpty) return;
+      if (index < 0 || index >= workers.length) return;
 
-    if (worker.latitude != null && worker.longitude != null) {
-      final GoogleMapController controller = await _controller.future;
-      controller.animateCamera(
-        CameraUpdate.newLatLng(LatLng(worker.latitude!, worker.longitude!)),
-      );
+      final worker = workers[index];
+      ref.read(selectedMarkerProvider.notifier).state = worker.id;
+
+      if (worker.latitude != null &&
+          worker.longitude != null &&
+          _controller.isCompleted) {
+        final GoogleMapController controller = await _controller.future;
+        await controller.animateCamera(
+          CameraUpdate.newLatLng(LatLng(worker.latitude!, worker.longitude!)),
+        );
+      }
+    } catch (_) {
+      // The map controller can detach during fast navigation/filter changes.
     }
   }
 
@@ -59,6 +76,21 @@ class _MapDiscoveryScreenState extends ConsumerState<MapDiscoveryScreen> {
     final workersAsync = ref.watch(nearbyWorkersProvider);
     final selectedWorkerId = ref.watch(selectedMarkerProvider);
 
+    workersAsync.whenData((workers) {
+      if (selectedWorkerId == null) return;
+      final selectedWorkerVisible = workers.any(
+        (worker) => worker.id == selectedWorkerId,
+      );
+      if (selectedWorkerVisible) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (ref.read(selectedMarkerProvider) == selectedWorkerId) {
+          ref.read(selectedMarkerProvider.notifier).state = null;
+        }
+      });
+    });
+
     return Scaffold(
       body: Stack(
         children: [
@@ -66,13 +98,16 @@ class _MapDiscoveryScreenState extends ConsumerState<MapDiscoveryScreen> {
             mapType: MapType.normal,
             initialCameraPosition: _initialPosition,
             onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
+              if (!_controller.isCompleted) {
+                _controller.complete(controller);
+              }
             },
             markers: workersAsync.maybeWhen(
               data: (workers) => workers
                   .map((worker) {
-                    if (worker.latitude == null || worker.longitude == null)
+                    if (worker.latitude == null || worker.longitude == null) {
                       return null;
+                    }
 
                     final isSelected = worker.id == selectedWorkerId;
 
@@ -138,7 +173,7 @@ class _MapDiscoveryScreenState extends ConsumerState<MapDiscoveryScreen> {
               height: 220,
               child: workersAsync.when(
                 loading: () => const SizedBox.shrink(),
-                error: (_, __) => const SizedBox.shrink(),
+                error: (_, _) => const SizedBox.shrink(),
                 data: (workers) {
                   if (workers.isEmpty) {
                     return Center(
@@ -152,7 +187,7 @@ class _MapDiscoveryScreenState extends ConsumerState<MapDiscoveryScreen> {
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: colorScheme.shadow.withOpacity(0.1),
+                              color: colorScheme.shadow.withValues(alpha: 0.1),
                               blurRadius: 10,
                             ),
                           ],

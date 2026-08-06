@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../../../translations.dart';
@@ -49,7 +50,7 @@ class _WorkerProfileDetailsScreenState
               onTap: () => controller.toggleFavorite(widget.workerId),
             ),
           IconButton(
-            onPressed: () {},
+            onPressed: null,
             icon: Icon(Icons.share, color: theme.colorScheme.onSurface),
           ),
         ],
@@ -87,7 +88,7 @@ class _WorkerProfileDetailsScreenState
                         if (_tabIndex == 0)
                           WorkerPortfolioPreview(
                             items: state.portfolio,
-                            onViewAll: () {},
+                            onViewAll: null,
                           ),
                         if (_tabIndex == 1)
                           WorkerServicesPreview(services: state.services),
@@ -99,7 +100,10 @@ class _WorkerProfileDetailsScreenState
                 ),
                 WorkerRequestServiceButton(
                   startsFrom: details.priceMin,
-                  onPressed: () {},
+                  onPressed: () => context.push(
+                    '/create-order',
+                    extra: {'workerId': details.workerId},
+                  ),
                 ),
               ],
             ),

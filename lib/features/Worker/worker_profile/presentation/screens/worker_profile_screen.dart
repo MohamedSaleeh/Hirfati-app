@@ -31,9 +31,9 @@ class WorkerProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileAsync = ref.watch(workerProfileProvider);
-
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: theme.colorScheme.surfaceContainerHighest,
       body: profileAsync.when(
         data: (profile) {
           return CustomScrollView(
@@ -42,7 +42,7 @@ class WorkerProfileScreen extends ConsumerWidget {
               SliverAppBar(
                 expandedHeight: 300,
                 pinned: true,
-                backgroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.surface,
                 elevation: 0,
 
                 flexibleSpace: FlexibleSpaceBar(
@@ -64,7 +64,7 @@ class WorkerProfileScreen extends ConsumerWidget {
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Column(
@@ -123,7 +123,8 @@ class WorkerProfileScreen extends ConsumerWidget {
                                         content: Text(
                                           'account already verified'.i18n,
                                         ),
-                                        backgroundColor: Colors.orange,
+                                        backgroundColor:
+                                            theme.colorScheme.primaryContainer,
                                       ),
                                     );
                                   }
@@ -133,7 +134,7 @@ class WorkerProfileScreen extends ConsumerWidget {
                             trailing: profile.isVerified
                                 ? Icon(
                                     Icons.verified,
-                                    color: Colors.blue,
+                                    color: theme.colorScheme.primary,
                                     size: 20,
                                   )
                                 : null,
@@ -168,21 +169,19 @@ class WorkerProfileScreen extends ConsumerWidget {
                         onPressed: () => _logout(context, ref),
                         icon: Icon(
                           Icons.logout,
-                          color: Theme.of(context).colorScheme.error,
+                          color: theme.colorScheme.error,
                         ),
                         label: Text(
                           "logout".i18n,
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
+                            color: theme.colorScheme.error,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.all(16),
-                          side: BorderSide(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
+                          side: BorderSide(color: theme.colorScheme.error),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -197,7 +196,7 @@ class WorkerProfileScreen extends ConsumerWidget {
                         'Version 2.4.1',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade500,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -219,7 +218,11 @@ class WorkerProfileScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 48, color: Colors.red),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: theme.colorScheme.error,
+              ),
               const SizedBox(height: 16),
               Text('error_loading_profile'.i18n),
               const SizedBox(height: 16),

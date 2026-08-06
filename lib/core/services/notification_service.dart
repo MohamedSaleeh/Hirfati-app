@@ -3,6 +3,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../utils/app_logger.dart';
+
 Future<bool> _isNotificationTypeEnabled(String type) async {
   final supabase = Supabase.instance.client;
   final user = supabase.auth.currentUser;
@@ -33,8 +35,12 @@ Future<bool> _isNotificationTypeEnabled(String type) async {
       default:
         return true;
     }
-  } catch (e) {
-    print('Error checking notification settings: $e');
+  } catch (error, stackTrace) {
+    AppLogger.error(
+      error,
+      stackTrace: stackTrace,
+      message: 'Unable to check notification settings',
+    );
     return true;
   }
 }
@@ -67,7 +73,7 @@ class NotificationService {
     // طلب الإذن
     await _requestPermissions();
 
-    // الحصول على FCM Token
+    // الحصول على رمز إشعارات الجهاز
     await _getToken();
 
     // ربط معالج الخلفية
@@ -79,7 +85,7 @@ class NotificationService {
     // ربط معالج الضغط على الإشعار
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
 
-    print('✅ Notification Service initialized successfully');
+    AppLogger.info('Notification service initialized');
   }
 
   // ✅ دالة إنشاء قناة الإشعارات (بدون priority و enableVibration)
@@ -98,7 +104,7 @@ class NotificationService {
           >()
           ?.createNotificationChannel(channel);
 
-      print('✅ Notification channel created');
+      AppLogger.info('Notification channel created');
     }
   }
 
@@ -108,19 +114,20 @@ class NotificationService {
       badge: true,
       sound: true,
     );
-    print('Notification permission status: ${settings.authorizationStatus}');
+    AppLogger.info(
+      'Notification permission status: ${settings.authorizationStatus}',
+    );
   }
 
   static Future<void> _getToken() async {
     String? token = await _firebaseMessaging.getToken();
-    print('📱 FCM Token: $token');
 
     if (token != null) {
       await _saveTokenToSupabase(token);
     }
 
     _firebaseMessaging.onTokenRefresh.listen((newToken) async {
-      print('Token refreshed: $newToken');
+      AppLogger.info('FCM token refreshed');
       await _saveTokenToSupabase(newToken);
     });
   }
@@ -137,11 +144,11 @@ class NotificationService {
         'fcm_token': token,
         'updated_at': DateTime.now().toIso8601String(),
       });
-      print('✅ Token saved successfully');
-    } catch (e) {
-      print('❌ Insert failed: $e');
+      AppLogger.info('FCM token saved');
+    } catch (error) {
+      AppLogger.warning('FCM token insert failed; attempting ownership update');
 
-      if (e.toString().contains('23505')) {
+      if (error.toString().contains('23505')) {
         try {
           await supabase
               .from('device_tokens')
@@ -150,19 +157,20 @@ class NotificationService {
                 'updated_at': DateTime.now().toIso8601String(),
               })
               .eq('fcm_token', token);
-          print('✅ Token updated successfully');
-        } catch (e2) {
-          print('❌ Update failed: $e2');
+          AppLogger.info('FCM token ownership updated');
+        } catch (updateError, stackTrace) {
+          AppLogger.error(
+            updateError,
+            stackTrace: stackTrace,
+            message: 'Unable to update FCM token ownership',
+          );
         }
       }
     }
   }
 
   static void _handleForegroundMessage(RemoteMessage message) async {
-    print('🔔🔔🔔 [CLIENT] Foreground message received! 🔔🔔🔔');
-    print('📱 Title: ${message.notification?.title}');
-    print('📱 Body: ${message.notification?.body}');
-    print('📱 Data: ${message.data}');
+    AppLogger.info('Foreground notification received');
 
     final notificationType = message.data['type'] ?? 'push';
     final isEnabled = await _isNotificationTypeEnabled(notificationType);
@@ -170,21 +178,19 @@ class NotificationService {
     if (isEnabled) {
       await _showLocalNotification(message);
     } else {
-      print('⚠️ Notification type "$notificationType" is disabled by user');
+      AppLogger.info('Notification type is disabled by user');
     }
 
     await _saveNotificationToDatabase(message);
   }
 
   static void _handleMessageOpenedApp(RemoteMessage message) {
-    print('🔔 Notification tapped: ${message.data}');
+    AppLogger.info('Notification tapped');
     _navigateToScreen(message.data);
   }
 
   // ✅ دالة عرض الإشعار المحلي (بدون priority و enableVibration)
   static Future<void> _showLocalNotification(RemoteMessage message) async {
-    print('📢 Showing local notification...');
-
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'hirfati_channel',
@@ -210,9 +216,13 @@ class NotificationService {
         payload: message.data.toString(),
         notificationDetails: details,
       );
-      print('✅ Local notification shown with id: $id');
-    } catch (e) {
-      print('❌ Failed to show notification: $e');
+      AppLogger.info('Local notification shown');
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        error,
+        stackTrace: stackTrace,
+        message: 'Unable to show local notification',
+      );
     }
   }
 
@@ -229,22 +239,22 @@ class NotificationService {
         'is_read': false,
         'created_at': DateTime.now().toIso8601String(),
       });
-      print('💾 Notification saved to database');
+      AppLogger.info('Notification saved');
     }
   }
 
   static void _navigateToScreen(Map<String, dynamic> data) {
-    print('Navigate to: ${data['type']}');
+    AppLogger.info('Notification navigation requested');
   }
 
   static void _onNotificationTap(NotificationResponse response) {
-    print('Local notification tapped: ${response.payload}');
+    AppLogger.info('Local notification tapped');
   }
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("📱 Background message received: ${message.messageId}");
+  AppLogger.info('Background notification received');
 
   final supabase = Supabase.instance.client;
   final user = supabase.auth.currentUser;
@@ -262,9 +272,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         'is_read': false,
         'created_at': DateTime.now().toIso8601String(),
       });
-      print('💾 Background notification saved to database');
+      AppLogger.info('Background notification saved');
     } else {
-      print('⚠️ Background notification type "$notificationType" is disabled');
+      AppLogger.info('Background notification type is disabled');
     }
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../translations.dart';
 import '../../domain/models/earnings_summary_model.dart';
-import '../providers/earnings_provider.dart';
 
 class EarningsSummaryCard extends ConsumerStatefulWidget {
   final EarningsSummaryModel summary;
@@ -20,72 +19,6 @@ class EarningsSummaryCard extends ConsumerStatefulWidget {
 }
 
 class _EarningsSummaryCardState extends ConsumerState<EarningsSummaryCard> {
-  bool _isWithdrawing = false;
-
-  Future<void> _handleWithdraw() async {
-    if (widget.summary.availableBalance <= 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('No balance to withdraw'.i18n)));
-      return;
-    }
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Withdrawal is currently unavailable.'.i18n),
-        content: Text(
-          'Are you sure you want to withdraw ${widget.summary.availableBalance.toStringAsFixed(0)} \$ to your Sham Cash account?'
-              .i18n,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'.i18n),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            ),
-            child: Text('Confirm'.i18n),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    setState(() => _isWithdrawing = true);
-
-    try {
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Amount transferred to Sham Cash successfully!'.i18n),
-            backgroundColor: Theme.of(context).colorScheme.tertiary,
-          ),
-        );
-        widget.onWithdraw();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'.i18n),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isWithdrawing = false);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

@@ -7,7 +7,7 @@ import '../../domain_models/craftsman_model.dart';
 /// The Supabase relational select string used for every worker query.
 ///
 /// Joins: workers → profiles (profile data) + categories (profession) + services
-const _kWorkerSelect = '''
+const kHomeClientWorkerSelect = '''
   id,
   category_id,
   rating_average,
@@ -166,7 +166,7 @@ class HomeClientSupabaseDatasource {
   Future<List<CraftsmanModel>> fetchRecommendedCraftsmen() async {
     final response = await _client
         .from('workers')
-        .select(_kWorkerSelect)
+        .select(kHomeClientWorkerSelect)
         .eq('approved', true)
         .order('rating_average', ascending: false)
         .limit(20);
@@ -236,7 +236,7 @@ class HomeClientSupabaseDatasource {
 
     final response = await _client
         .from('workers')
-        .select(_kWorkerSelect)
+        .select(kHomeClientWorkerSelect)
         .eq('approved', true)
         .inFilter('id', workerIds.toList())
         .order('rating_average', ascending: false);
@@ -250,7 +250,7 @@ class HomeClientSupabaseDatasource {
   Future<List<CraftsmanModel>> fetchNearbyCraftsmen() async {
     final response = await _client
         .from('workers')
-        .select(_kWorkerSelect)
+        .select(kHomeClientWorkerSelect)
         .eq('approved', true)
         .limit(30);
 

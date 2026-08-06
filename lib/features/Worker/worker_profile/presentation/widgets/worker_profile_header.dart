@@ -9,17 +9,18 @@ class WorkerProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(32),
           bottomRight: Radius.circular(32),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -33,12 +34,16 @@ class WorkerProfileHeader extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundColor: Colors.grey.shade200,
+                backgroundColor: theme.colorScheme.onSurface.withOpacity(0.1),
                 backgroundImage: profile.avatarUrl != null
                     ? NetworkImage(profile.avatarUrl!)
                     : null,
                 child: profile.avatarUrl == null
-                    ? Icon(Icons.person, size: 50, color: Colors.grey.shade400)
+                    ? Icon(
+                        Icons.person,
+                        size: 50,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      )
                     : null,
               ),
               if (profile.isVerified)
@@ -48,13 +53,16 @@ class WorkerProfileHeader extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: theme.colorScheme.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(
+                        color: theme.colorScheme.onPrimary,
+                        width: 2,
+                      ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.verified,
-                      color: Colors.white,
+                      color: theme.colorScheme.onPrimary,
                       size: 16,
                     ),
                   ),
@@ -65,10 +73,7 @@ class WorkerProfileHeader extends StatelessWidget {
           // Name
           Text(
             profile.fullName,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           // Profession
@@ -76,7 +81,7 @@ class WorkerProfileHeader extends StatelessWidget {
             profile.profession ?? 'Professional',
             style: TextStyle(
               fontSize: 16,
-              color: Colors.grey.shade600,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -97,7 +102,7 @@ class WorkerProfileHeader extends StatelessWidget {
                 ' (${profile.reviewCount} ${'reviews'.i18n})',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

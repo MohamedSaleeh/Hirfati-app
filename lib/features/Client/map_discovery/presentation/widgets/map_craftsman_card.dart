@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../Home_client/domain_models/craftsman_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../translations.dart';
 
-class MapCraftsmanCard extends StatelessWidget {
+import '../../../../../core/presentation/providers/language_provider.dart';
+import '../../../../../translations.dart';
+import '../../../Home_client/domain_models/category_model.dart';
+import '../../../Home_client/domain_models/craftsman_model.dart';
+
+class MapCraftsmanCard extends ConsumerWidget {
   final CraftsmanModel craftsman;
   final bool isSelected;
 
@@ -14,9 +18,16 @@ class MapCraftsmanCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final language = ref.watch(language_provider);
+    final professionLabel = craftsman.category == null
+        ? craftsman.profession ?? ''
+        : resolveCategoryDisplayName(craftsman.category!, language);
+    final displayProfession = professionLabel.isEmpty
+        ? 'Professional'.i18n
+        : professionLabel;
     final distanceText = craftsman.distance > 0
         ? '${craftsman.distance.toStringAsFixed(1)} km away'.i18n
         : '1.2 km away'.i18n;
@@ -95,7 +106,7 @@ class MapCraftsmanCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      craftsman.profession ?? 'Professional'.i18n,
+                      displayProfession,
                       style: TextStyle(
                         color: colorScheme.onSurfaceVariant,
                         fontSize: 12,
@@ -152,7 +163,7 @@ class MapCraftsmanCard extends StatelessWidget {
                 ],
               ),
               GestureDetector(
-                onTap: () => _handleBooking(context),
+                onTap: () => _handleBooking(context, professionLabel),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -179,13 +190,13 @@ class MapCraftsmanCard extends StatelessWidget {
     );
   }
 
-  void _handleBooking(BuildContext context) {
+  void _handleBooking(BuildContext context, String professionLabel) {
     context.push(
       '/create-order',
       extra: {
         'workerId': craftsman.id,
         'serviceId': craftsman.serviceId ?? '',
-        'serviceName': craftsman.profession ?? '',
+        'serviceName': professionLabel,
         'estimatedPrice': craftsman.hourlyPrice,
         'isDirectBooking': true,
       },

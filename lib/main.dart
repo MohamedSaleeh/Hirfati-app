@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hirfati/router.dart';
 import 'core/presentation/providers/theme_provider.dart';
 import 'core/services/notification_service.dart';
+import 'core/utils/app_logger.dart';
 import 'theme.dart';
 import 'translations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -17,23 +18,27 @@ Future<void> main(List<String> args) async {
 
   try {
     await dotenv.load(fileName: ".env");
-    debugPrint(".env loaded successfully");
-  } catch (e, st) {
-    debugPrint("Failed to load .env: $e");
-    debugPrintStack(stackTrace: st);
-    rethrow;
+    AppLogger.info('Local environment file loaded');
+  } catch (_) {
+    AppLogger.warning(
+      'Local environment file was not loaded; using dart-define values.',
+    );
   }
 
-  final firebaseApiKey = dotenv.env['FIREBASE_API_KEY'];
-  final firebaseAppId = dotenv.env['FIREBASE_APP_ID'];
-  final firebaseMessagingSenderId = dotenv.env['FIREBASE_MESSAGING_SENDER_ID'];
-  final firebaseProjectId = dotenv.env['FIREBASE_PROJECT_ID'];
+  final firebaseApiKey = _configValue('FIREBASE_API_KEY');
+  final firebaseAppId = _configValue('FIREBASE_APP_ID');
+  final firebaseMessagingSenderId = _configValue(
+    'FIREBASE_MESSAGING_SENDER_ID',
+  );
+  final firebaseProjectId = _configValue('FIREBASE_PROJECT_ID');
 
   if (firebaseApiKey == null ||
       firebaseAppId == null ||
       firebaseMessagingSenderId == null ||
       firebaseProjectId == null) {
-    throw Exception('Missing Firebase values in .env file');
+    throw Exception(
+      'Missing Firebase configuration. Provide public Firebase values with --dart-define or local development environment values.',
+    );
   }
 
   await Firebase.initializeApp(
@@ -47,11 +52,13 @@ Future<void> main(List<String> args) async {
 
   await Localization.loadArabicFromJson();
 
-  final supabaseUrl = dotenv.env['SUPABASE_URL'];
-  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+  final supabaseUrl = _configValue('SUPABASE_URL');
+  final supabaseAnonKey = _configValue('SUPABASE_ANON_KEY');
 
   if (supabaseUrl == null || supabaseAnonKey == null) {
-    throw Exception('Missing SUPABASE_URL or SUPABASE_ANON_KEY in .env file');
+    throw Exception(
+      'Missing Supabase configuration. Provide SUPABASE_URL and SUPABASE_ANON_KEY with --dart-define or local development environment values.',
+    );
   }
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
@@ -63,6 +70,29 @@ Future<void> main(List<String> args) async {
   runApp(
     ProviderScope(child: I18n(autoSaveLocale: true, child: const MyApp())),
   );
+}
+
+String? _configValue(String key) {
+  final dartDefineValue = switch (key) {
+    'SUPABASE_URL' => const String.fromEnvironment('SUPABASE_URL'),
+    'SUPABASE_ANON_KEY' => const String.fromEnvironment('SUPABASE_ANON_KEY'),
+    'FIREBASE_API_KEY' => const String.fromEnvironment('FIREBASE_API_KEY'),
+    'FIREBASE_APP_ID' => const String.fromEnvironment('FIREBASE_APP_ID'),
+    'FIREBASE_MESSAGING_SENDER_ID' => const String.fromEnvironment(
+      'FIREBASE_MESSAGING_SENDER_ID',
+    ),
+    'FIREBASE_PROJECT_ID' => const String.fromEnvironment(
+      'FIREBASE_PROJECT_ID',
+    ),
+    _ => '',
+  };
+
+  if (dartDefineValue.trim().isNotEmpty) return dartDefineValue.trim();
+
+  final dotenvValue = dotenv.env[key]?.trim();
+  if (dotenvValue != null && dotenvValue.isNotEmpty) return dotenvValue;
+
+  return null;
 }
 
 class MyApp extends ConsumerWidget {

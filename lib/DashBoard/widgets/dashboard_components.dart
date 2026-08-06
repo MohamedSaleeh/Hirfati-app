@@ -59,7 +59,7 @@ class DashboardPanel extends StatelessWidget {
                         ],
                       ),
                     ),
-                  if (trailing != null) trailing!,
+                  ?trailing,
                 ],
               ),
               const SizedBox(height: 16),
@@ -266,12 +266,17 @@ class DashboardSearchField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: DashboardColors.muted, fontSize: 12),
-        prefixIcon:
-            const Icon(Icons.search, color: DashboardColors.muted, size: 18),
+        prefixIcon: const Icon(
+          Icons.search,
+          color: DashboardColors.muted,
+          size: 18,
+        ),
         filled: true,
         fillColor: DashboardColors.surfaceAlt,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: DashboardColors.border),
@@ -301,13 +306,14 @@ class DashboardResponsiveBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxWidth =
-            constraints.hasBoundedWidth ? constraints.maxWidth : preferredWidth;
+        final maxWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : preferredWidth;
         final width = maxWidth < minWidth
             ? maxWidth
             : maxWidth < preferredWidth
-                ? maxWidth
-                : preferredWidth;
+            ? maxWidth
+            : preferredWidth;
 
         return SizedBox(width: width, child: child);
       },
@@ -342,8 +348,10 @@ class DashboardSelect<T> extends StatelessWidget {
         decoration: InputDecoration(
           filled: true,
           fillColor: DashboardColors.surfaceAlt,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: const BorderSide(color: DashboardColors.border),
@@ -404,9 +412,7 @@ class DashboardButton extends StatelessWidget {
           disabledForegroundColor: DashboardColors.muted,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(7),
-            side: BorderSide(
-              color: outlined ? DashboardColors.border : color,
-            ),
+            side: BorderSide(color: outlined ? DashboardColors.border : color),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14),
         ),
@@ -514,14 +520,25 @@ class DashboardPagination extends StatelessWidget {
   const DashboardPagination({
     super.key,
     required this.summary,
-    this.pages = const ['1', '2', '3'],
+    this.currentPage = 1,
+    this.totalPages = 1,
+    this.onPageChanged,
   });
 
   final String summary;
-  final List<String> pages;
+  final int currentPage;
+  final int totalPages;
+  final ValueChanged<int>? onPageChanged;
 
   @override
   Widget build(BuildContext context) {
+    final firstPage = totalPages <= 5
+        ? 1
+        : (currentPage - 2).clamp(1, totalPages - 4);
+    final pages = List<int>.generate(
+      totalPages.clamp(1, 5),
+      (index) => firstPage + index,
+    );
     return Row(
       children: [
         Expanded(
@@ -536,7 +553,9 @@ class DashboardPagination extends StatelessWidget {
         DashboardIconAction(
           icon: Icons.chevron_right,
           tooltip: 'السابق',
-          onPressed: () {},
+          onPressed: currentPage <= 1 || onPageChanged == null
+              ? null
+              : () => onPageChanged!(currentPage - 1),
         ),
         const SizedBox(width: 6),
         ...pages.map(
@@ -546,20 +565,30 @@ class DashboardPagination extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 3),
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: page == '1' ? DashboardColors.primary : Colors.transparent,
+              color: page == currentPage
+                  ? DashboardColors.primary
+                  : Colors.transparent,
               borderRadius: BorderRadius.circular(7),
               border: Border.all(
-                color: page == '1'
+                color: page == currentPage
                     ? DashboardColors.primary
                     : DashboardColors.border,
               ),
             ),
-            child: Text(
-              page,
-              style: const TextStyle(
-                color: DashboardColors.text,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(7),
+              onTap: page == currentPage || onPageChanged == null
+                  ? null
+                  : () => onPageChanged!(page),
+              child: Center(
+                child: Text(
+                  '$page',
+                  style: const TextStyle(
+                    color: DashboardColors.text,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
             ),
           ),
@@ -568,7 +597,9 @@ class DashboardPagination extends StatelessWidget {
         DashboardIconAction(
           icon: Icons.chevron_left,
           tooltip: 'التالي',
-          onPressed: () {},
+          onPressed: currentPage >= totalPages || onPageChanged == null
+              ? null
+              : () => onPageChanged!(currentPage + 1),
         ),
       ],
     );
@@ -580,10 +611,14 @@ class DashboardEmptyState extends StatelessWidget {
     super.key,
     required this.title,
     required this.message,
+    this.actionLabel,
+    this.onAction,
   });
 
   final String title;
   final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -607,6 +642,10 @@ class DashboardEmptyState extends StatelessWidget {
               fontWeight: FontWeight.w800,
             ),
           ),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 12),
+            TextButton(onPressed: onAction, child: Text(actionLabel!)),
+          ],
           const SizedBox(height: 6),
           Text(
             message,
@@ -719,6 +758,13 @@ String dashboardNumber(int value) {
     }
   }
   return buffer.toString();
+}
+
+String dashboardAmount(double value) {
+  final whole = value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toStringAsFixed(2);
+  return '\$$whole USD';
 }
 
 String dashboardDate(DateTime? date) {

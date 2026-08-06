@@ -22,29 +22,46 @@ class _VerificationPageState extends ConsumerState<VerificationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final pendingAsync = ref.watch(adminPendingVerificationProvider);
+    final processingIds = ref.watch(verificationActionControllerProvider);
+    if (pendingAsync.isLoading && !pendingAsync.hasValue) {
+      return const Center(
+        child: CircularProgressIndicator(color: DashboardColors.primary),
+      );
+    }
+    if (pendingAsync.hasError && !pendingAsync.hasValue) {
+      return DashboardEmptyState(
+        title: 'تعذر تحميل طلبات التوثيق',
+        message: pendingAsync.error.toString(),
+        actionLabel: 'إعادة المحاولة',
+        onAction: () => ref.invalidate(adminPendingVerificationProvider),
+      );
+    }
+    final allRequests =
+        pendingAsync.value ?? const <DashboardVerificationRequest>[];
     final specialties = {
       'all': 'جميع التخصصات',
-      for (final request in widget.snapshot.verificationRequests)
-        request.specialty: request.specialty,
+      for (final request in allRequests) request.specialty: request.specialty,
     };
-    final requests = widget.snapshot.verificationRequests.where((request) {
-      final q = _query.trim().toLowerCase();
-      final matchesSearch = q.isEmpty ||
-          request.craftsmanName.toLowerCase().contains(q) ||
-          request.phone.toLowerCase().contains(q) ||
-          request.city.toLowerCase().contains(q) ||
-          request.specialty.toLowerCase().contains(q);
-      final matchesSpecialty =
-          _specialty == 'all' || request.specialty == _specialty;
-      return matchesSearch && matchesSpecialty;
-    }).toList()
-      ..sort((a, b) {
-        final aDate = a.requestedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        final bDate = b.requestedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-        return _sort == 'newest'
-            ? bDate.compareTo(aDate)
-            : aDate.compareTo(bDate);
-      });
+    final requests =
+        allRequests.where((request) {
+          final q = _query.trim().toLowerCase();
+          final matchesSearch =
+              q.isEmpty ||
+              request.craftsmanName.toLowerCase().contains(q) ||
+              request.phone.toLowerCase().contains(q) ||
+              request.city.toLowerCase().contains(q) ||
+              request.specialty.toLowerCase().contains(q);
+          final matchesSpecialty =
+              _specialty == 'all' || request.specialty == _specialty;
+          return matchesSearch && matchesSpecialty;
+        }).toList()..sort((a, b) {
+          final aDate = a.requestedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bDate = b.requestedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return _sort == 'newest'
+              ? bDate.compareTo(aDate)
+              : aDate.compareTo(bDate);
+        });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,7 +119,9 @@ class _VerificationPageState extends ConsumerState<VerificationPage> {
               DashboardIconAction(
                 icon: Icons.refresh,
                 tooltip: 'تحديث',
-                onPressed: () => ref.invalidate(dashboardSnapshotProvider),
+                onPressed: pendingAsync.isLoading
+                    ? null
+                    : () => ref.invalidate(adminPendingVerificationProvider),
               ),
             ],
           ),
@@ -121,10 +140,12 @@ class _VerificationPageState extends ConsumerState<VerificationPage> {
                     DashboardTableFrame(
                       minWidth: 1120,
                       child: DataTable(
-                        headingRowColor:
-                            WidgetStateProperty.all(DashboardColors.surfaceAlt),
-                        dataRowColor:
-                            WidgetStateProperty.all(DashboardColors.surface),
+                        headingRowColor: WidgetStateProperty.all(
+                          DashboardColors.surfaceAlt,
+                        ),
+                        dataRowColor: WidgetStateProperty.all(
+                          DashboardColors.surface,
+                        ),
                         columnSpacing: 26,
                         columns: const [
                           DataColumn(label: Text('المعرف')),
@@ -138,47 +159,65 @@ class _VerificationPageState extends ConsumerState<VerificationPage> {
                           DataColumn(label: Text('الإجراءات')),
                         ],
                         rows: requests.take(10).map((request) {
-                          final rejected = request.status ==
+                          final rejected =
+                              request.status ==
                               VerificationDashboardStatus.rejected;
                           return DataRow(
                             color: WidgetStateProperty.all(
                               rejected
-                                  ? DashboardColors.danger
-                                      .withValues(alpha: 0.09)
+                                  ? DashboardColors.danger.withValues(
+                                      alpha: 0.09,
+                                    )
                                   : DashboardColors.surface,
                             ),
                             cells: [
                               DataCell(Text('#${_shortId(request.id)}')),
                               DataCell(_VerificationUserCell(request: request)),
-                              DataCell(DashboardBadge(
-                                label: request.specialty,
-                                color: DashboardColors.primary,
-                              )),
+                              DataCell(
+                                DashboardBadge(
+                                  label: request.specialty,
+                                  color: DashboardColors.primary,
+                                ),
+                              ),
                               DataCell(Text(request.city)),
                               DataCell(Text(_experienceLabel(request))),
                               DataCell(Text(_ratingLabel(request))),
                               DataCell(
                                 Text(dashboardDate(request.requestedAt)),
                               ),
-                              const DataCell(
-                                Text(
-                                  'غير متوفرة',
-                                  style: TextStyle(
-                                    color: DashboardColors.muted,
+                              DataCell(
+                                request.attachments.isEmpty
+                                    ? const Text(
+                                        'غير متوفرة',
+                                        style: TextStyle(
+                                          color: DashboardColors.muted,
+                                        ),
+                                      )
+                                    : TextButton.icon(
+                                        onPressed: () =>
+                                            _showDocuments(request),
+                                        icon: const Icon(Icons.attach_file),
+                                        label: Text(
+                                          '${request.attachments.length}',
+                                        ),
+                                      ),
+                              ),
+                              DataCell(
+                                _VerificationActions(
+                                  request: request,
+                                  isProcessing: processingIds.contains(
+                                    request.id,
+                                  ),
+                                  onAccept: () => _updateStatus(
+                                    request,
+                                    VerificationDashboardStatus.approved,
+                                  ),
+                                  onReject: () => _updateStatus(
+                                    request,
+                                    VerificationDashboardStatus.rejected,
                                   ),
                                 ),
                               ),
-                              DataCell(_VerificationActions(
-                                request: request,
-                                onAccept: () => _updateStatus(
-                                  request,
-                                  VerificationDashboardStatus.approved,
-                                ),
-                                onReject: () => _updateStatus(
-                                  request,
-                                  VerificationDashboardStatus.rejected,
-                                ),
-                              )),
                             ],
                           );
                         }).toList(),
@@ -202,20 +241,105 @@ class _VerificationPageState extends ConsumerState<VerificationPage> {
     DashboardVerificationRequest request,
     VerificationDashboardStatus status,
   ) async {
+    String? rejectionReason;
+    if (status == VerificationDashboardStatus.rejected) {
+      rejectionReason = await _askRejectionReason();
+      if (rejectionReason == null || rejectionReason.trim().isEmpty) return;
+    }
     try {
-      await ref.read(dashboardAdminServiceProvider).updateVerificationStatus(
-            request: request,
-            status: status,
+      final changed = await ref
+          .read(verificationActionControllerProvider.notifier)
+          .process(
+            requestId: request.id,
+            approve: status == VerificationDashboardStatus.approved,
+            rejectionReason: rejectionReason,
           );
+      if (!changed) return;
+      ref.invalidate(adminPendingVerificationProvider);
+      ref.invalidate(dashboardOverviewProvider);
       ref.invalidate(dashboardSnapshotProvider);
       if (mounted) {
-        _showMessage(status == VerificationDashboardStatus.approved
-            ? 'تم قبول توثيق ${request.craftsmanName}.'
-            : 'تم رفض الطلب، ولا يوجد حقل لحفظ سبب الرفض في المخطط الحالي.');
+        _showMessage(
+          status == VerificationDashboardStatus.approved
+              ? 'تم قبول توثيق ${request.craftsmanName}.'
+              : 'تم رفض الطلب وحفظ سبب الرفض.',
+        );
       }
     } catch (error) {
       if (mounted) _showMessage('تعذر تحديث حالة الطلب: $error');
     }
+  }
+
+  Future<String?> _askRejectionReason() async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('سبب الرفض'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 3,
+          decoration: const InputDecoration(hintText: 'اكتب سبب الرفض'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('إلغاء'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, controller.text),
+            child: const Text('رفض الطلب'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    return result;
+  }
+
+  Future<void> _showDocuments(DashboardVerificationRequest request) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('مستندات التوثيق'),
+        content: SizedBox(
+          width: 620,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: request.attachments.entries
+                  .map(
+                    (entry) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(entry.key),
+                          const SizedBox(height: 6),
+                          Image.network(
+                            entry.value,
+                            height: 220,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, _, _) =>
+                                const Text('تعذر عرض المستند'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('إغلاق'),
+          ),
+        ],
+      ),
+    );
   }
 
   String _shortId(String id) => id.length > 8 ? id.substring(0, 8) : id;
@@ -233,9 +357,9 @@ class _VerificationPageState extends ConsumerState<VerificationPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -281,11 +405,13 @@ class _VerificationActions extends StatelessWidget {
     required this.request,
     required this.onAccept,
     required this.onReject,
+    required this.isProcessing,
   });
 
   final DashboardVerificationRequest request;
   final VoidCallback onAccept;
   final VoidCallback onReject;
+  final bool isProcessing;
 
   @override
   Widget build(BuildContext context) {
@@ -303,7 +429,9 @@ class _VerificationActions extends StatelessWidget {
         DashboardButton(
           label: 'قبول',
           icon: Icons.check,
-          onPressed: request.status == VerificationDashboardStatus.approved
+          onPressed:
+              isProcessing ||
+                  request.status == VerificationDashboardStatus.approved
               ? null
               : onAccept,
         ),
@@ -313,7 +441,7 @@ class _VerificationActions extends StatelessWidget {
           icon: Icons.close,
           color: DashboardColors.danger,
           outlined: true,
-          onPressed: onReject,
+          onPressed: isProcessing ? null : onReject,
         ),
       ],
     );

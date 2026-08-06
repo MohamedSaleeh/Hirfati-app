@@ -78,7 +78,7 @@ class WalletTransaction {
       balanceAfter: parseWalletNumeric(json['balance_after']),
       status: _stringOrNull(json['status']) ?? 'pending',
       transferGroup: _stringOrNull(json['transfer_group']),
-      currency: _stringOrNull(json['currency']) ?? 'SYP',
+      currency: _stringOrNull(json['currency']) ?? 'USD',
       title: _stringOrNull(json['title']),
       description: _stringOrNull(json['description']),
       createdAt: parseWalletDate(json['created_at']),
@@ -89,7 +89,8 @@ class WalletTransaction {
   String? get paymentMethod => transactionType;
   String? get transactionId => transferGroup;
   DateTime? get paidAt => status == 'completed' ? createdAt : null;
-  String? get referenceNumber => transferGroup;
+  String? get referenceNumber =>
+      _stringOrNull(metadata?['external_reference']) ?? transferGroup;
   double get fee => 0;
   String get provider => 'wallet';
 
@@ -133,12 +134,30 @@ class WalletData {
   final WalletAccount wallet;
   final bool walletExists;
   final List<WalletTransaction> transactions;
+  final WalletClientProfile profile;
 
   const WalletData({
     required this.wallet,
     required this.walletExists,
     required this.transactions,
+    required this.profile,
   });
+}
+
+class WalletClientProfile {
+  const WalletClientProfile({required this.userId, this.fullName, this.phone});
+
+  final String userId;
+  final String? fullName;
+  final String? phone;
+
+  factory WalletClientProfile.fromJson(Map<String, dynamic> json) {
+    return WalletClientProfile(
+      userId: json['id']?.toString() ?? '',
+      fullName: _stringOrNull(json['full_name']),
+      phone: _stringOrNull(json['phone']),
+    );
+  }
 }
 
 double parseWalletNumeric(Object? value, [double fallback = 0]) {
@@ -227,6 +246,8 @@ bool _isSafeMetadataKey(String key) {
     'reference_number',
     'status',
     'transaction_id',
+    'external_reference',
+    'source',
   };
 
   return allowedKeys.contains(normalized);

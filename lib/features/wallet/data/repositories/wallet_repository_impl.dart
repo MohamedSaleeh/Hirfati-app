@@ -11,14 +11,17 @@ class WalletRepositoryImpl implements WalletRepository {
   Future<WalletData> getWalletData(String userId) async {
     final walletFuture = _datasource.getWallet(userId);
     final transactionsFuture = _datasource.getTransactions(userId);
+    final profileFuture = _datasource.getProfile(userId);
 
     final wallet = await walletFuture;
     final transactions = await transactionsFuture;
+    final profile = await profileFuture;
 
     return WalletData(
       wallet: wallet ?? WalletAccount.empty(userId),
       walletExists: wallet != null,
       transactions: transactions,
+      profile: profile,
     );
   }
 

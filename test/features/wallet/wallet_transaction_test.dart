@@ -16,7 +16,7 @@ void main() {
       'balance_after': '7500',
       'status': 'completed',
       'transfer_group': 'group-1',
-      'currency': 'SYP',
+      'currency': 'USD',
       'title': 'Order payment',
       'description': 'Payment description',
       'created_at': '2026-08-06T10:00:00Z',
@@ -27,6 +27,20 @@ void main() {
     expect(transaction.transactionType, 'payment');
     expect(transaction.balanceBefore, 10000);
     expect(transaction.balanceAfter, 7500);
-    expect(transaction.currency, 'SYP');
+    expect(transaction.currency, 'USD');
+    expect(transaction.amount, 2500);
+  });
+
+  test('defaults a missing wallet ledger currency to USD', () {
+    final transaction = WalletTransaction.fromJson({
+      'id': 'ledger-2',
+      'wallet_user_id': 'user-1',
+      'amount': 19.5,
+      'balance_before': 10,
+      'balance_after': 29.5,
+    });
+
+    expect(transaction.currency, 'USD');
+    expect(transaction.amount, 19.5);
   });
 }

@@ -35,6 +35,7 @@ void main() {
       'transaction_id': null,
       'reference_number': null,
       'paid_at': null,
+      'currency': 'USD',
     });
 
     expect(result.success, isTrue);
@@ -42,6 +43,21 @@ void main() {
     expect(result.paymentId, 'payment-1');
     expect(result.transactionId, isNull);
     expect(result.paidAt, isNull);
+    expect(result.currency, 'USD');
+  });
+
+  test('payment and settlement currency defaults are USD', () {
+    final payment = Payment(
+      id: 'payment-1',
+      orderId: 'order-1',
+      amount: 42.5,
+      status: PaymentTransactionStatus.completed,
+      createdAt: DateTime(2026),
+    );
+
+    expect(payment.currency, 'USD');
+    expect(payment.amount, 42.5);
+    expect(PaymentSettlementResult.fromJson(const {}).currency, 'USD');
   });
 
   test('maps insufficient wallet balance without exposing raw errors', () {

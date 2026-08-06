@@ -1,6 +1,12 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../models/admin_users_models.dart';
+import '../models/admin_wallet_deposit_models.dart';
 import '../models/dashboard_models.dart';
 import '../providers/dashboard_providers.dart';
 import '../theme/dashboard_colors.dart';
@@ -16,21 +22,25 @@ class UsersPage extends ConsumerStatefulWidget {
 }
 
 class _UsersPageState extends ConsumerState<UsersPage> {
-  String _query = '';
-  UserDashboardRole? _role;
-  UserDashboardStatus? _status;
+  Timer? _searchDebounce;
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final users = widget.snapshot.users.where((user) {
-      final q = _query.trim().toLowerCase();
-      final matchesSearch = q.isEmpty ||
-          user.name.toLowerCase().contains(q) ||
-          user.phone.toLowerCase().contains(q);
-      final matchesRole = _role == null || user.role == _role;
-      final matchesStatus = _status == null || user.status == _status;
-      return matchesSearch && matchesRole && matchesStatus;
-    }).toList();
+    final usersState = ref.watch(adminUsersControllerProvider);
+    final users = usersState.users;
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    final visibleRange = UserPagination.visibleRange(
+      usersState.query.currentPage,
+      usersState.query.pageSize,
+      users.length,
+      usersState.totalUsers,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,38 +56,57 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                 minWidth: 220,
                 child: DashboardSearchField(
                   hint: 'بحث بالاسم أو رقم الهاتف...',
-                  onChanged: (value) => setState(() => _query = value),
+                  onChanged: (value) {
+                    _searchDebounce?.cancel();
+                    _searchDebounce = Timer(
+                      const Duration(milliseconds: 350),
+                      () {
+                        if (!mounted) return;
+                        ref
+                            .read(adminUsersControllerProvider.notifier)
+                            .setSearch(value);
+                      },
+                    );
+                  },
                 ),
               ),
               DashboardResponsiveBox(
                 preferredWidth: 170,
                 child: DashboardSelect<UserDashboardRole?>(
-                  value: _role,
+                  value: usersState.query.role,
                   items: const {
                     null: 'كل الأدوار',
                     UserDashboardRole.client: 'العملاء',
                     UserDashboardRole.craftsman: 'الحرفيون',
                     UserDashboardRole.admin: 'المديرون',
                   },
-                  onChanged: (value) => setState(() => _role = value),
+                  onChanged: (value) => ref
+                      .read(adminUsersControllerProvider.notifier)
+                      .setRole(value),
                 ),
               ),
               DashboardResponsiveBox(
                 preferredWidth: 180,
                 child: DashboardSelect<UserDashboardStatus?>(
-                  value: _status,
+                  value: usersState.query.status,
                   items: const {
                     null: 'كل الحالات',
                     UserDashboardStatus.active: 'نشط',
                     UserDashboardStatus.suspended: 'غير نشط',
                   },
-                  onChanged: (value) => setState(() => _status = value),
+                  onChanged: (value) => ref
+                      .read(adminUsersControllerProvider.notifier)
+                      .setStatus(value),
                 ),
               ),
               DashboardIconAction(
                 icon: Icons.refresh,
                 tooltip: 'تحديث',
-                onPressed: () => ref.invalidate(dashboardSnapshotProvider),
+                onPressed: usersState.loading
+                    ? null
+                    : () => ref
+                          .read(adminUsersControllerProvider.notifier)
+                          .load(),
               ),
               DashboardButton(
                 label: 'إضافة مستخدم',
@@ -92,7 +121,24 @@ class _UsersPageState extends ConsumerState<UsersPage> {
         const SizedBox(height: 16),
         DashboardPanel(
           padding: EdgeInsets.zero,
-          child: users.isEmpty
+          child: usersState.loading && users.isEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(48),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: DashboardColors.primary,
+                    ),
+                  ),
+                )
+              : usersState.errorMessage != null && users.isEmpty
+              ? DashboardEmptyState(
+                  title: 'تعذر تحميل المستخدمين',
+                  message: usersState.errorMessage!,
+                  actionLabel: 'إعادة المحاولة',
+                  onAction: () =>
+                      ref.read(adminUsersControllerProvider.notifier).load(),
+                )
+              : users.isEmpty
               ? const DashboardEmptyState(
                   title: 'لا توجد نتائج',
                   message: 'جرّب تغيير البحث أو الفلاتر الحالية.',
@@ -102,10 +148,12 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                     DashboardTableFrame(
                       minWidth: 940,
                       child: DataTable(
-                        headingRowColor:
-                            WidgetStateProperty.all(DashboardColors.surfaceAlt),
-                        dataRowColor:
-                            WidgetStateProperty.all(DashboardColors.surface),
+                        headingRowColor: WidgetStateProperty.all(
+                          DashboardColors.surfaceAlt,
+                        ),
+                        dataRowColor: WidgetStateProperty.all(
+                          DashboardColors.surface,
+                        ),
                         columnSpacing: 26,
                         columns: const [
                           DataColumn(label: Text('المستخدم')),
@@ -116,9 +164,12 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                           DataColumn(label: Text('آخر تحديث')),
                           DataColumn(label: Text('الإجراءات')),
                         ],
-                        rows: users.take(10).map((user) {
+                        rows: users.map((user) {
                           final isActive =
                               user.status != UserDashboardStatus.suspended;
+                          final isProcessing = usersState.processingUserIds
+                              .contains(user.id);
+                          final isCurrentAdmin = user.id == currentUserId;
                           return DataRow(
                             cells: [
                               DataCell(_UserIdentityCell(user: user)),
@@ -145,29 +196,54 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                                     DashboardIconAction(
                                       icon: Icons.visibility_outlined,
                                       tooltip: 'عرض',
-                                      onPressed: () => _showDetails(user),
+                                      onPressed: isProcessing
+                                          ? null
+                                          : () => _showDetails(user),
                                     ),
+                                    if (user.role == UserDashboardRole.client &&
+                                        isActive) ...[
+                                      const SizedBox(width: 6),
+                                      DashboardIconAction(
+                                        icon: Icons
+                                            .account_balance_wallet_outlined,
+                                        tooltip: 'إضافة رصيد',
+                                        color: DashboardColors.success,
+                                        onPressed: isProcessing
+                                            ? null
+                                            : () => _showWalletDepositDialog(
+                                                user,
+                                              ),
+                                      ),
+                                    ],
                                     const SizedBox(width: 6),
                                     DashboardIconAction(
                                       icon: isActive
                                           ? Icons.pause_circle_outline
                                           : Icons.play_circle_outline,
-                                      tooltip:
-                                          isActive ? 'تعطيل' : 'إعادة تفعيل',
+                                      tooltip: isActive
+                                          ? 'تعطيل'
+                                          : 'إعادة تفعيل',
                                       color: isActive
                                           ? DashboardColors.warning
                                           : DashboardColors.success,
-                                      onPressed: () => _setUserActive(
-                                        user,
-                                        !isActive,
-                                      ),
+                                      onPressed:
+                                          isProcessing ||
+                                              (isCurrentAdmin && isActive)
+                                          ? null
+                                          : () => _confirmStatusToggle(
+                                              user,
+                                              !isActive,
+                                            ),
                                     ),
                                     const SizedBox(width: 6),
                                     DashboardIconAction(
                                       icon: Icons.delete_outline,
                                       tooltip: 'تعطيل آمن',
                                       color: DashboardColors.danger,
-                                      onPressed: isActive
+                                      onPressed:
+                                          isActive &&
+                                              !isProcessing &&
+                                              !isCurrentAdmin
                                           ? () => _showDeleteDialog(user)
                                           : null,
                                     ),
@@ -183,7 +259,12 @@ class _UsersPageState extends ConsumerState<UsersPage> {
                       padding: const EdgeInsets.all(16),
                       child: DashboardPagination(
                         summary:
-                            'عرض 1 إلى ${users.take(10).length} من أصل ${users.length} مستخدم',
+                            'عرض ${visibleRange.first} إلى ${visibleRange.last} من أصل ${usersState.totalUsers} مستخدم',
+                        currentPage: usersState.query.currentPage,
+                        totalPages: usersState.totalPages,
+                        onPageChanged: (page) => ref
+                            .read(adminUsersControllerProvider.notifier)
+                            .goToPage(page),
                       ),
                     ),
                   ],
@@ -195,19 +276,221 @@ class _UsersPageState extends ConsumerState<UsersPage> {
 
   Future<void> _setUserActive(DashboardUser user, bool isActive) async {
     try {
-      await ref.read(dashboardAdminServiceProvider).setUserActive(
-            userId: user.id,
-            isActive: isActive,
-          );
+      final changed = await ref
+          .read(adminUsersControllerProvider.notifier)
+          .setActiveStatus(user.id, isActive);
+      if (!changed) return;
+      ref.invalidate(dashboardOverviewProvider);
       ref.invalidate(dashboardSnapshotProvider);
       if (mounted) {
-        _showMessage(isActive
-            ? 'تمت إعادة تفعيل ${user.name}.'
-            : 'تم تعطيل ${user.name} بشكل آمن.');
+        _showMessage(
+          isActive
+              ? 'تمت إعادة تفعيل ${user.name}.'
+              : 'تم تعطيل ${user.name} بشكل آمن.',
+        );
       }
-    } catch (error) {
-      if (mounted) _showMessage('تعذر تحديث حالة المستخدم: $error');
+    } on AdminUsersActionException catch (error) {
+      if (mounted) _showMessage(error.message);
     }
+  }
+
+  Future<void> _confirmStatusToggle(DashboardUser user, bool isActive) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(isActive ? 'إعادة تفعيل الحساب' : 'تعطيل الحساب'),
+        content: Text(
+          isActive
+              ? 'هل تريد إعادة تفعيل حساب ${user.name}؟'
+              : 'هل تريد تعطيل حساب ${user.name}؟',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('إلغاء'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(isActive ? 'تفعيل' : 'تعطيل'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await _setUserActive(user, isActive);
+  }
+
+  Future<void> _showWalletDepositDialog(DashboardUser user) async {
+    final amountController = TextEditingController();
+    final referenceController = TextEditingController();
+    final noteController = TextEditingController();
+    final idempotencyKey = _newIdempotencyKey();
+    final balanceFuture = ref
+        .read(adminWalletDepositControllerProvider.notifier)
+        .getBalance(user.id);
+    var submitting = false;
+    String? errorText;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('إضافة رصيد'),
+          content: SizedBox(
+            width: 440,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('العميل: ${user.name}'),
+                  SelectableText('المعرف: ${user.id}'),
+                  FutureBuilder<double>(
+                    future: balanceFuture,
+                    builder: (context, snapshot) => Text(
+                      snapshot.hasData
+                          ? 'الرصيد الحالي: \$${snapshot.data!.toStringAsFixed(0)} USD'
+                          : 'الرصيد الحالي: جارٍ التحميل...',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: amountController,
+                    enabled: !submitting,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'مبلغ الشحن *',
+                      suffixText: 'USD',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: referenceController,
+                    enabled: !submitting,
+                    decoration: const InputDecoration(
+                      labelText: 'مرجع الدفع الخارجي *',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: noteController,
+                    enabled: !submitting,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'ملاحظة إدارية (اختياري)',
+                    ),
+                  ),
+                  if (errorText != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      errorText!,
+                      style: const TextStyle(color: DashboardColors.danger),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: submitting ? null : () => Navigator.pop(dialogContext),
+              child: const Text('إلغاء'),
+            ),
+            FilledButton(
+              onPressed: submitting
+                  ? null
+                  : () async {
+                      final amount = double.tryParse(
+                        amountController.text.replaceAll(',', '').trim(),
+                      );
+                      final request = AdminWalletDepositRequest(
+                        userId: user.id,
+                        amount: amount ?? 0,
+                        reference: referenceController.text,
+                        note: noteController.text,
+                        idempotencyKey: idempotencyKey,
+                      );
+                      final validation = request.validate();
+                      if (validation != null) {
+                        setDialogState(
+                          () => errorText = _walletDepositError(validation),
+                        );
+                        return;
+                      }
+                      setDialogState(() {
+                        submitting = true;
+                        errorText = null;
+                      });
+                      try {
+                        final result = await ref
+                            .read(adminWalletDepositControllerProvider.notifier)
+                            .deposit(request);
+                        if (result == null || !dialogContext.mounted) return;
+                        Navigator.pop(dialogContext);
+                        if (mounted) {
+                          _showMessage(
+                            'تمت إضافة الرصيد بنجاح. الرصيد الجديد: '
+                            '\$${result.balanceAfter.toStringAsFixed(0)} USD',
+                          );
+                        }
+                      } on AdminWalletDepositException catch (error) {
+                        if (dialogContext.mounted) {
+                          setDialogState(() {
+                            submitting = false;
+                            errorText = _walletDepositError(error.code);
+                          });
+                        }
+                      } catch (_) {
+                        if (dialogContext.mounted) {
+                          setDialogState(() {
+                            submitting = false;
+                            errorText = _walletDepositError('unexpected');
+                          });
+                        }
+                      }
+                    },
+              child: submitting
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('تأكيد الإضافة'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    amountController.dispose();
+    referenceController.dispose();
+    noteController.dispose();
+  }
+
+  String _newIdempotencyKey() {
+    final random = Random.secure();
+    String hex(int length) => List.generate(
+      length,
+      (_) => random.nextInt(16).toRadixString(16),
+    ).join();
+    return '${hex(8)}-${hex(4)}-4${hex(3)}-a${hex(3)}-${hex(12)}';
+  }
+
+  String _walletDepositError(String code) {
+    return switch (code) {
+      'unauthenticated' => 'انتهت جلسة الدخول. يرجى تسجيل الدخول مجددًا.',
+      'forbidden' => 'ليست لديك صلاحية لإضافة الرصيد.',
+      'target_user_not_found' => 'تعذر العثور على حساب العميل.',
+      'target_must_be_client' => 'يمكن إضافة الرصيد لحسابات العملاء فقط.',
+      'inactive_target_account' => 'لا يمكن شحن حساب غير نشط.',
+      'invalid_deposit_amount' => 'أدخل مبلغًا رقميًا أكبر من صفر.',
+      'missing_external_reference' => 'مرجع الدفع الخارجي مطلوب.',
+      'missing_idempotency_key' => 'تعذر إنشاء معرف العملية. أعد فتح النافذة.',
+      'wallet_locked' => 'محفظة العميل مقفلة حاليًا.',
+      'idempotency_conflict' => 'تعارض في معرف العملية. أعد فتح النافذة.',
+      _ => 'تعذر إضافة الرصيد. حاول مرة أخرى.',
+    };
   }
 
   void _showDeleteDialog(DashboardUser user) {
@@ -325,9 +608,9 @@ class _UsersPageState extends ConsumerState<UsersPage> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 

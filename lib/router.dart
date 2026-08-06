@@ -74,6 +74,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           return currentRoute == "/auth" ? null : "/auth";
         }
 
+        if (!await _currentUserIsActive()) {
+          await Supabase.instance.client.auth.signOut();
+          return '/auth';
+        }
+
         try {
           final isAdmin = await _currentWebUserIsAdmin();
           if (!isAdmin) return currentRoute == '/admin' ? null : '/admin';
@@ -119,6 +124,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         return isAuthRoute ? null : "/auth";
       }
 
+      if (!await _currentUserIsActive()) {
+        await Supabase.instance.client.auth.signOut();
+        return '/auth';
+      }
+
       if (currentRoute == '/map') {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref.read(clientNavigationProvider.notifier).state = 2;
@@ -134,7 +144,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         final isProfileCompleted = await ref
             .read(authControllerProvider.notifier)
             .isWorkerProfileCompleted();
-        print("🎯🎯🎯Worker profile completed: $isProfileCompleted");
         final isCompleteProfileRoute =
             currentRoute == "/complete_worker_profile";
 
@@ -465,4 +474,17 @@ Future<bool> _currentWebUserIsAdmin() async {
       .maybeSingle();
 
   return profile?['role']?.toString().toLowerCase() == 'admin';
+}
+
+Future<bool> _currentUserIsActive() async {
+  final userId = Supabase.instance.client.auth.currentUser?.id;
+  if (userId == null) return false;
+
+  final profile = await Supabase.instance.client
+      .from('profiles')
+      .select('is_active')
+      .eq('id', userId)
+      .maybeSingle();
+
+  return profile?['is_active'] != false;
 }

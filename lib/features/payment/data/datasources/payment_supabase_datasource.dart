@@ -59,6 +59,7 @@ class PaymentSupabaseDatasource {
       id: response['id'].toString(),
       orderId: response['order_id'].toString(),
       amount: (response['amount'] as num).toDouble(),
+      currency: response['currency']?.toString() ?? 'USD',
       status: _parseStatus(response['status']?.toString()),
       paymentMethod: response['payment_method']?.toString(),
       transactionId: response['transaction_id']?.toString(),

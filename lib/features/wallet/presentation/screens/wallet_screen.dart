@@ -1,18 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/utils/date_utils.dart' as app_date_utils;
 import '../../../../translations.dart';
 import '../../domain/models/wallet_models.dart';
+import '../../domain/wallet_whatsapp_top_up.dart';
 import '../providers/wallet_provider.dart';
 
-class WalletScreen extends ConsumerWidget {
-  const WalletScreen({super.key});
+class WalletScreen extends ConsumerStatefulWidget {
+  const WalletScreen({
+    super.key,
+    this.topUpLauncher,
+    this.supportNumberOverride,
+  });
+
+  final Future<bool> Function(Uri uri)? topUpLauncher;
+  final String? supportNumberOverride;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WalletScreen> createState() => _WalletScreenState();
+}
+
+class _WalletScreenState extends ConsumerState<WalletScreen> {
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final walletAsync = ref.watch(walletProvider);
 
@@ -44,6 +60,12 @@ class WalletScreen extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               children: [
                 _WalletBalanceCard(data: data),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => _openTopUpDialog(data.profile),
+                  icon: const Icon(Icons.chat_outlined),
+                  label: const Text('شحن الرصيد عبر واتساب'),
+                ),
                 const SizedBox(height: 24),
                 _PaymentHistorySection(
                   transactions: data.transactions,
@@ -91,6 +113,158 @@ class WalletScreen extends ConsumerWidget {
     } catch (_) {
       // The error state is rendered by walletProvider.
     }
+  }
+
+  Future<void> _openTopUpDialog(WalletClientProfile profile) async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _WalletWhatsAppTopUpDialog(
+        onLaunch: (amount) => _launchWhatsApp(profile, amount),
+      ),
+    );
+  }
+
+  Future<bool> _launchWhatsApp(
+    WalletClientProfile profile,
+    String amount,
+  ) async {
+    final configuredNumber =
+        widget.supportNumberOverride ??
+        dotenv.env['WHATSAPP_SUPPORT_NUMBER'] ??
+        '';
+    if (configuredNumber.trim().isEmpty) {
+      _showTopUpError('رقم دعم واتساب غير مضاف في إعدادات التطبيق.');
+      return false;
+    }
+    final number = WalletWhatsAppTopUp.normalizeNumber(configuredNumber);
+    if (!WalletWhatsAppTopUp.isValidNumber(number)) {
+      _showTopUpError('رقم دعم واتساب في إعدادات التطبيق غير صالح.');
+      return false;
+    }
+
+    try {
+      final message = WalletWhatsAppTopUp.buildArabicMessage(
+        userId: profile.userId,
+        fullName: profile.fullName,
+        phone: profile.phone,
+        amount: amount,
+      );
+      final uri = WalletWhatsAppTopUp.buildUri(
+        number: number,
+        message: message,
+      );
+      if (await _tryLaunch(uri)) return true;
+
+      final fallbackUri = WalletWhatsAppTopUp.buildFallbackUri(
+        number: number,
+        message: message,
+      );
+      if (!await _tryLaunch(fallbackUri)) {
+        _showTopUpError(
+          'تعذر فتح واتساب. يرجى التأكد من تثبيته والمحاولة مجددًا.',
+        );
+        return false;
+      }
+      return true;
+    } catch (_) {
+      _showTopUpError('تعذر فتح واتساب. حاول مرة أخرى.');
+      return false;
+    }
+  }
+
+  Future<bool> _tryLaunch(Uri uri) async {
+    try {
+      if (widget.topUpLauncher != null) {
+        return await widget.topUpLauncher!(uri);
+      }
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  void _showTopUpError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+class _WalletWhatsAppTopUpDialog extends StatefulWidget {
+  const _WalletWhatsAppTopUpDialog({required this.onLaunch});
+
+  final Future<bool> Function(String amount) onLaunch;
+
+  @override
+  State<_WalletWhatsAppTopUpDialog> createState() =>
+      _WalletWhatsAppTopUpDialogState();
+}
+
+class _WalletWhatsAppTopUpDialogState
+    extends State<_WalletWhatsAppTopUpDialog> {
+  late final TextEditingController _amountController;
+  bool _launching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _amountController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_launching) return;
+    final amount = _amountController.text.trim();
+    setState(() => _launching = true);
+    final launched = await widget.onLaunch(amount);
+    if (!mounted) return;
+    if (launched) {
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() => _launching = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('شحن الرصيد عبر واتساب'),
+      content: TextField(
+        key: const Key('wallet-top-up-amount'),
+        controller: _amountController,
+        enabled: !_launching,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+        ],
+        decoration: const InputDecoration(
+          labelText: 'المبلغ المطلوب (اختياري)',
+          suffixText: 'USD',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _launching ? null : () => Navigator.of(context).pop(),
+          child: const Text('إلغاء'),
+        ),
+        FilledButton(
+          key: const Key('wallet-top-up-launch'),
+          onPressed: _launching ? null : _submit,
+          child: _launching
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('فتح واتساب'),
+        ),
+      ],
+    );
   }
 }
 
@@ -761,6 +935,9 @@ String? _formatDateOrNull(DateTime? date) {
 }
 
 String _paymentTitle(WalletTransaction payment) {
+  if (payment.title != null && payment.title!.trim().isNotEmpty) {
+    return payment.title!;
+  }
   if (payment.paymentMethod != null) {
     return _formatEnumLabel(payment.paymentMethod!);
   }

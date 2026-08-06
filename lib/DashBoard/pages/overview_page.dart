@@ -21,8 +21,8 @@ class OverviewPage extends ConsumerWidget {
             final cardWidth = constraints.maxWidth >= 1120
                 ? (constraints.maxWidth - 48) / 4
                 : constraints.maxWidth >= 680
-                    ? (constraints.maxWidth - 16) / 2
-                    : constraints.maxWidth;
+                ? (constraints.maxWidth - 16) / 2
+                : constraints.maxWidth;
 
             return Wrap(
               spacing: 16,
@@ -36,48 +36,49 @@ class OverviewPage extends ConsumerWidget {
                     value: dashboardNumber(snapshot.totalUsers),
                     icon: Icons.groups,
                     color: DashboardColors.primary,
-                    badge: 'نشط ${dashboardNumber(snapshot.activeUsersCount)}',
-                    subtitle:
-                        'عملاء ${dashboardNumber(snapshot.clientsCount)} / حرفيون ${dashboardNumber(snapshot.workersCount)} / مديرون ${dashboardNumber(snapshot.adminsCount)}',
+                    subtitle: 'المسجلون في profiles',
                   ),
                 ),
                 SizedBox(
                   width: cardWidth,
                   height: 164,
                   child: DashboardStatCard(
-                    title: 'في انتظار التوثيق',
-                    value: dashboardNumber(snapshot.pendingVerificationCount),
-                    icon: Icons.verified_user,
+                    title: 'إجمالي الحرفيين',
+                    value: dashboardNumber(snapshot.metrics.totalWorkers),
+                    icon: Icons.engineering,
                     color: DashboardColors.primary,
-                    subtitle: 'حرفيون مكتملو الملف بانتظار الاعتماد',
+                    subtitle: 'المسجلون في workers',
                   ),
                 ),
                 SizedBox(
                   width: cardWidth,
                   height: 164,
                   child: DashboardStatCard(
-                    title: 'الشكاوى المفتوحة',
-                    value: dashboardNumber(snapshot.openComplaintsCount),
-                    icon: Icons.gavel,
+                    title: 'إجمالي الطلبات',
+                    value: dashboardNumber(snapshot.metrics.totalOrders),
+                    icon: Icons.receipt_long,
                     color: DashboardColors.warning,
-                    subtitle: 'رسائل دعم غير محلولة',
+                    subtitle:
+                        'اليوم ${dashboardNumber(snapshot.metrics.ordersToday)} / مكتملة ${dashboardNumber(snapshot.metrics.completedOrders)}',
                   ),
                 ),
                 SizedBox(
                   width: cardWidth,
                   height: 164,
                   child: DashboardStatCard(
-                    title: 'حسابات غير نشطة',
-                    value: dashboardNumber(snapshot.deletedAccountsCount),
-                    icon: Icons.delete_sweep,
-                    color: DashboardColors.muted,
-                    subtitle: 'من profiles.is_active = false',
+                    title: 'الطلبات النشطة',
+                    value: dashboardNumber(snapshot.metrics.activeOrders),
+                    icon: Icons.pending_actions,
+                    color: DashboardColors.primary,
+                    subtitle: 'معلقة، مقبولة، أو قيد التنفيذ',
                   ),
                 ),
               ],
             );
           },
         ),
+        const SizedBox(height: 18),
+        _MetricsPanel(metrics: snapshot.metrics),
         const SizedBox(height: 18),
         LayoutBuilder(
           builder: (context, constraints) {
@@ -94,11 +95,7 @@ class OverviewPage extends ConsumerWidget {
             if (!wide) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  side,
-                  const SizedBox(height: 16),
-                  table,
-                ],
+                children: [side, const SizedBox(height: 16), table],
               );
             }
 
@@ -112,7 +109,194 @@ class OverviewPage extends ConsumerWidget {
             );
           },
         ),
+        const SizedBox(height: 18),
+        _RankedLists(snapshot: snapshot),
       ],
+    );
+  }
+}
+
+class _MetricsPanel extends StatelessWidget {
+  const _MetricsPanel({required this.metrics});
+
+  final DashboardMetrics metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    final values = <(String, String)>[
+      ('المدفوعات المكتملة', dashboardAmount(metrics.completedPaymentsAmount)),
+      (
+        'السحوبات المكتملة',
+        dashboardAmount(metrics.completedWithdrawalsAmount),
+      ),
+      ('إجمالي أرصدة المحافظ', dashboardAmount(metrics.totalWalletBalance)),
+      (
+        'طلبات التوثيق المعلقة',
+        dashboardNumber(metrics.pendingVerificationRequests),
+      ),
+      (
+        'رسائل الدعم غير المحلولة',
+        dashboardNumber(metrics.unresolvedSupportMessages),
+      ),
+      ('إجمالي الإشعارات', dashboardNumber(metrics.totalNotifications)),
+    ];
+    return DashboardPanel(
+      title: 'المؤشرات المالية والتشغيلية',
+      child: Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children: values
+            .map(
+              (value) => SizedBox(
+                width: 220,
+                child: ListTile(
+                  dense: true,
+                  title: Text(
+                    value.$1,
+                    style: const TextStyle(color: DashboardColors.muted),
+                  ),
+                  subtitle: Text(
+                    value.$2,
+                    style: const TextStyle(
+                      color: DashboardColors.text,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+}
+
+class _RankedLists extends StatelessWidget {
+  const _RankedLists({required this.snapshot});
+
+  final DashboardSnapshot snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final panels = [
+          DashboardPanel(
+            title: 'أحدث المستخدمين',
+            child: snapshot.latestUsers.isEmpty
+                ? const DashboardEmptyState(
+                    title: 'لا يوجد مستخدمون',
+                    message: 'ستظهر أحدث الحسابات هنا.',
+                  )
+                : Column(
+                    children: snapshot.latestUsers
+                        .map(
+                          (user) => _SimpleRow(
+                            title: user.name,
+                            subtitle: user.city ?? _roleText(user.role),
+                            value: dashboardDate(user.createdAt),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+          DashboardPanel(
+            title: 'أفضل الحرفيين',
+            child: snapshot.topWorkers.isEmpty
+                ? const DashboardEmptyState(
+                    title: 'لا يوجد حرفيون',
+                    message: 'ستظهر تقييمات الحرفيين هنا.',
+                  )
+                : Column(
+                    children: snapshot.topWorkers
+                        .map(
+                          (worker) => _SimpleRow(
+                            title: worker.fullName,
+                            subtitle: worker.approved ? 'معتمد' : 'غير معتمد',
+                            value:
+                                '${worker.ratingAverage.toStringAsFixed(1)} (${worker.ratingCount})',
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+          DashboardPanel(
+            title: 'أكثر التصنيفات طلباً',
+            child: snapshot.topCategories.isEmpty
+                ? const DashboardEmptyState(
+                    title: 'لا توجد تصنيفات',
+                    message: 'ستظهر التصنيفات المرتبطة بالطلبات هنا.',
+                  )
+                : Column(
+                    children: snapshot.topCategories
+                        .map(
+                          (category) => _SimpleRow(
+                            title: category.name,
+                            subtitle: 'عدد الطلبات',
+                            value: dashboardNumber(category.orderCount),
+                          ),
+                        )
+                        .toList(),
+                  ),
+          ),
+        ];
+        if (constraints.maxWidth < 980) {
+          return Column(
+            children: panels
+                .expand((panel) => [panel, const SizedBox(height: 14)])
+                .toList(),
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:
+              panels
+                  .expand(
+                    (panel) => [
+                      Expanded(child: panel),
+                      const SizedBox(width: 14),
+                    ],
+                  )
+                  .toList()
+                ..removeLast(),
+        );
+      },
+    );
+  }
+
+  String _roleText(UserDashboardRole role) => switch (role) {
+    UserDashboardRole.admin => 'مدير',
+    UserDashboardRole.craftsman => 'حرفي',
+    UserDashboardRole.client => 'عميل',
+  };
+}
+
+class _SimpleRow extends StatelessWidget {
+  const _SimpleRow({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+  });
+
+  final String title;
+  final String subtitle;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      title: Text(title, overflow: TextOverflow.ellipsis),
+      subtitle: Text(subtitle, overflow: TextOverflow.ellipsis),
+      trailing: Text(
+        value,
+        style: const TextStyle(
+          color: DashboardColors.primary,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 }
@@ -307,8 +491,9 @@ class PendingVerificationPanel extends ConsumerWidget {
           : DashboardTableFrame(
               minWidth: 840,
               child: DataTable(
-                headingRowColor:
-                    WidgetStateProperty.all(DashboardColors.surfaceAlt),
+                headingRowColor: WidgetStateProperty.all(
+                  DashboardColors.surfaceAlt,
+                ),
                 dataRowColor: WidgetStateProperty.all(DashboardColors.surface),
                 columnSpacing: 24,
                 columns: const [
@@ -377,24 +562,23 @@ class PendingVerificationPanel extends ConsumerWidget {
     VerificationDashboardStatus status,
   ) async {
     try {
-      await ref.read(dashboardAdminServiceProvider).updateVerificationStatus(
-            request: request,
-            status: status,
-          );
+      await ref
+          .read(dashboardAdminServiceProvider)
+          .updateVerificationStatus(request: request, status: status);
       ref.invalidate(dashboardSnapshotProvider);
       if (context.mounted) {
         final message = status == VerificationDashboardStatus.approved
             ? 'تم قبول توثيق ${request.craftsmanName}.'
             : 'تم رفض الطلب، ولا يوجد حقل لحفظ سبب الرفض في المخطط الحالي.';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       }
     } catch (error) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('تعذر تحديث الطلب: $error')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('تعذر تحديث الطلب: $error')));
       }
     }
   }

@@ -7,6 +7,15 @@ class WalletSupabaseDatasource {
 
   WalletSupabaseDatasource(this._client);
 
+  Future<WalletClientProfile> getProfile(String userId) async {
+    final response = await _client
+        .from('profiles')
+        .select('id, full_name, phone')
+        .eq('id', userId)
+        .single();
+    return WalletClientProfile.fromJson(response);
+  }
+
   Future<WalletAccount?> getWallet(String userId) async {
     final response = await _client
         .from('wallets')
@@ -24,7 +33,8 @@ class WalletSupabaseDatasource {
         .select(
           'id, wallet_user_id, counterparty_user_id, payment_id, order_id, '
           'transaction_type, direction, amount, balance_before, balance_after, '
-          'status, transfer_group, currency, title, description, created_at',
+          'status, transfer_group, currency, title, description, created_at, '
+          'metadata',
         )
         .eq('wallet_user_id', userId)
         .order('created_at', ascending: false);

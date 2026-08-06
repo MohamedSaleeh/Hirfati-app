@@ -73,16 +73,10 @@ class DashboardAdminService {
       'profiles',
       equals: {'role': 'client'},
     );
-    final adminsCount = await _countRows(
-      'profiles',
-      equals: {'role': 'admin'},
-    );
+    final adminsCount = await _countRows('profiles', equals: {'role': 'admin'});
     final pendingVerificationCount = await _countRows(
       'workers',
-      equals: {
-        'approved': false,
-        'profile_completed': true,
-      },
+      equals: {'approved': false, 'profile_completed': true},
     );
     final openComplaintsCount = await _countRows(
       'support_messages',
@@ -96,8 +90,9 @@ class DashboardAdminService {
     final categoryNamesById = <String, String>{
       for (final category in categories)
         if (category['id'] != null)
-          category['id'].toString():
-              _readString(category, ['name'], 'غير مصنف'),
+          category['id'].toString(): _readString(category, [
+            'name',
+          ], 'غير مصنف'),
     };
 
     final profilesById = <String, Map<String, dynamic>>{
@@ -145,24 +140,17 @@ class DashboardAdminService {
     );
   }
 
-  Future<void> setUserActive({
-    required String userId,
-    required bool isActive,
-  }) async {
-    await _client.from('profiles').update({
-      'is_active': isActive,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', userId);
-  }
-
   Future<void> updateVerificationStatus({
     required DashboardVerificationRequest request,
     required VerificationDashboardStatus status,
   }) async {
-    await _client.from('workers').update({
-      'approved': status == VerificationDashboardStatus.approved,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('id', request.id);
+    await _client
+        .from('workers')
+        .update({
+          'approved': status == VerificationDashboardStatus.approved,
+          'updated_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', request.id);
   }
 
   Future<void> setComplaintResolved({
@@ -171,7 +159,8 @@ class DashboardAdminService {
   }) async {
     await _client
         .from('support_messages')
-        .update({'is_resolved': isResolved}).eq('id', complaintId);
+        .update({'is_resolved': isResolved})
+        .eq('id', complaintId);
   }
 
   Future<DashboardNotificationSettings> loadMyNotificationSettings() async {
@@ -270,8 +259,9 @@ class DashboardAdminService {
     return profiles.map((profile) {
       final id = _readString(profile, ['id'], '');
       final worker = workersByUserId[id];
-      final roleValue =
-          _readString(profile, ['role'], worker == null ? 'client' : 'worker');
+      final roleValue = _readString(profile, [
+        'role',
+      ], worker == null ? 'client' : 'worker');
       final categoryId = worker?['category_id']?.toString();
       final createdAt = _parseDate(profile['created_at']);
       final updatedAt = _parseDate(profile['updated_at']);
@@ -319,7 +309,8 @@ class DashboardAdminService {
         experienceYears: _readInt(worker['experience_years']),
         ratingAverage: _readDouble(worker['rating_average']),
         status: VerificationDashboardStatus.pending,
-        requestedAt: _parseDate(worker['updated_at']) ??
+        requestedAt:
+            _parseDate(worker['updated_at']) ??
             _parseDate(worker['created_at']),
         attachments: const {},
       );
@@ -358,9 +349,9 @@ class DashboardAdminService {
   List<DeletedAccountRecord> _mapDisabledProfiles(
     List<Map<String, dynamic>> profiles,
   ) {
-    return profiles
-        .where((profile) => profile['is_active'] == false)
-        .map((row) {
+    return profiles.where((profile) => profile['is_active'] == false).map((
+      row,
+    ) {
       final role = _parseUserRole(_readString(row, ['role'], 'client'), false);
       return DeletedAccountRecord(
         id: _readString(row, ['id'], ''),
@@ -369,7 +360,8 @@ class DashboardAdminService {
         phone: _readString(row, ['phone'], 'غير متوفر'),
         city: _readString(row, ['city'], 'غير متوفر'),
         reason: 'غير متوفر',
-        deletedAt: _parseDate(row['updated_at']) ??
+        deletedAt:
+            _parseDate(row['updated_at']) ??
             _parseDate(row['created_at']) ??
             DateTime.now(),
         deletedBy: 'غير متوفر',
@@ -394,11 +386,9 @@ class DashboardAdminService {
       if (createdAt == null) continue;
       final profile = profilesById[_readString(message, ['user_id'], '')];
       final subject = _readString(message, ['subject'], 'رسالة دعم');
-      final userName = _readString(
-        profile ?? const <String, dynamic>{},
-        ['full_name'],
-        'مستخدم غير معروف',
-      );
+      final userName = _readString(profile ?? const <String, dynamic>{}, [
+        'full_name',
+      ], 'مستخدم غير معروف');
       items.add(
         DashboardActivityItem(
           title: message['is_resolved'] == true ? 'تم حل شكوى' : 'شكوى جديدة',
@@ -411,20 +401,21 @@ class DashboardAdminService {
       );
     }
 
-    for (final worker in workers
-        .where((row) =>
-            row['approved'] == false && row['profile_completed'] == true)
-        .take(5)) {
+    for (final worker
+        in workers
+            .where(
+              (row) =>
+                  row['approved'] == false && row['profile_completed'] == true,
+            )
+            .take(5)) {
       final createdAt =
           _parseDate(worker['updated_at']) ?? _parseDate(worker['created_at']);
       if (createdAt == null) continue;
       final profile = profilesById[_readString(worker, ['user_id'], '')];
       final categoryId = worker['category_id']?.toString();
-      final workerName = _readString(
-        profile ?? const <String, dynamic>{},
-        ['full_name'],
-        'حرفي بدون اسم',
-      );
+      final workerName = _readString(profile ?? const <String, dynamic>{}, [
+        'full_name',
+      ], 'حرفي بدون اسم');
       final categoryName = categoryNamesById[categoryId] ?? 'غير محدد';
       items.add(
         DashboardActivityItem(

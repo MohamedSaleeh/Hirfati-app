@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/dashboard_models.dart';
+import '../providers/dashboard_providers.dart';
 import '../theme/dashboard_colors.dart';
 import 'dashboard_components.dart';
 
-class DashboardHeader extends StatelessWidget {
+class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key, required this.section});
 
   final DashboardSection section;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final meta = _sectionMeta(section);
+    final isRefreshing = ref.watch(dashboardSnapshotProvider).isLoading;
 
     return Container(
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 28),
       decoration: const BoxDecoration(
         color: DashboardColors.background,
-        border: Border(
-          bottom: BorderSide(color: Color(0x141D2B3D)),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0x141D2B3D))),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -63,6 +64,15 @@ class DashboardHeader extends StatelessWidget {
                 const SizedBox(width: 12),
               ],
               DashboardIconAction(
+                icon: Icons.refresh,
+                tooltip: 'تحديث لوحة التحكم',
+                onPressed: isRefreshing
+                    ? null
+                    : () => ref.invalidate(dashboardSnapshotProvider),
+                color: DashboardColors.primary,
+              ),
+              const SizedBox(width: 8),
+              DashboardIconAction(
                 icon: Icons.notifications_none,
                 tooltip: 'الإشعارات',
                 onPressed: () {},
@@ -78,29 +88,29 @@ class DashboardHeader extends StatelessWidget {
   _HeaderMeta _sectionMeta(DashboardSection section) {
     return switch (section) {
       DashboardSection.overview => const _HeaderMeta(
-          'نظرة عامة',
-          'مرحباً بك مجدداً، إليك ما يحدث اليوم في منصتك.',
-        ),
+        'نظرة عامة',
+        'مرحباً بك مجدداً، إليك ما يحدث اليوم في منصتك.',
+      ),
       DashboardSection.users => const _HeaderMeta(
-          'إدارة المستخدمين',
-          'استعرض وقم بإدارة حسابات العملاء والحرفيين.',
-        ),
+        'إدارة المستخدمين',
+        'استعرض وقم بإدارة حسابات العملاء والحرفيين.',
+      ),
       DashboardSection.verification => const _HeaderMeta(
-          'طلبات التوثيق المعلقة',
-          'راجع واعتمد طلبات الحرفيين الجدد للانضمام للمنصة.',
-        ),
+        'طلبات التوثيق المعلقة',
+        'راجع واعتمد طلبات الحرفيين الجدد للانضمام للمنصة.',
+      ),
       DashboardSection.complaints => const _HeaderMeta(
-          'إدارة الشكاوى',
-          'عرض ومعالجة النزاعات بين العملاء والحرفيين.',
-        ),
+        'إدارة الشكاوى',
+        'عرض ومعالجة النزاعات بين العملاء والحرفيين.',
+      ),
       DashboardSection.deletions => const _HeaderMeta(
-          'سجل المحذوفات',
-          'سجل تدقيق كامل للحسابات المحذوفة من المنصة.',
-        ),
+        'سجل المحذوفات',
+        'سجل تدقيق كامل للحسابات المحذوفة من المنصة.',
+      ),
       DashboardSection.settings => const _HeaderMeta(
-          'الإعدادات العامة',
-          'تخصيص إعدادات المنصة وإدارة التنبيهات.',
-        ),
+        'الإعدادات العامة',
+        'تخصيص إعدادات المنصة وإدارة التنبيهات.',
+      ),
     };
   }
 }

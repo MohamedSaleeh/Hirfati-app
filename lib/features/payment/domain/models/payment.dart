@@ -17,6 +17,7 @@ abstract class Payment with _$Payment {
     required String id,
     required String orderId,
     required double amount,
+    @Default('USD') String currency,
     required PaymentTransactionStatus status,
     String? paymentMethod,
     String? transactionId,
@@ -38,6 +39,7 @@ class PaymentSettlementResult {
   final String? transactionId;
   final String? referenceNumber;
   final DateTime? paidAt;
+  final String currency;
 
   const PaymentSettlementResult({
     required this.success,
@@ -49,6 +51,7 @@ class PaymentSettlementResult {
     this.transactionId,
     this.referenceNumber,
     this.paidAt,
+    this.currency = 'USD',
   });
 
   factory PaymentSettlementResult.fromJson(Map<String, dynamic> json) {
@@ -62,6 +65,7 @@ class PaymentSettlementResult {
       transactionId: json['transaction_id']?.toString(),
       referenceNumber: json['reference_number']?.toString(),
       paidAt: DateTime.tryParse(json['paid_at']?.toString() ?? ''),
+      currency: json['currency']?.toString() ?? 'USD',
     );
   }
 }

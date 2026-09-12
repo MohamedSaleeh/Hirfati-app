@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:flutter/foundation.dart';
 import '../../domain/models/payment.dart';
 
 class PaymentSupabaseDatasource {
@@ -25,25 +25,96 @@ class PaymentSupabaseDatasource {
     required String idempotencyKey,
   }) async {
     try {
+      debugPrint('============================================');
+      debugPrint('SETTLE WALLET PAYMENT START');
+      debugPrint('Order ID: $orderId');
+      debugPrint('Idempotency Key: $idempotencyKey');
+      debugPrint('============================================');
+
+      final params = settlementParameters(
+        orderId: orderId,
+        idempotencyKey: idempotencyKey,
+      );
+
+      debugPrint('RPC Name: settle_order_payment');
+      debugPrint('RPC Params: $params');
+
       final response = await _client.rpc(
         'settle_order_payment',
-        params: settlementParameters(
-          orderId: orderId,
-          idempotencyKey: idempotencyKey,
-        ),
+        params: params,
       );
+
+      debugPrint('');
+      debugPrint('========== SETTLE RPC RESPONSE ==========');
+      debugPrint('Response: $response');
+      debugPrint('Response type: ${response.runtimeType}');
+      debugPrint('=========================================');
+
       final json = _responseMap(response);
+
+      debugPrint('Parsed JSON: $json');
+
       final result = PaymentSettlementResult.fromJson(json);
-      if (!result.success) {
-        throw const PaymentException('payment_failed', 'Payment failed');
+
+      debugPrint('');
+      debugPrint('========== SETTLEMENT RESULT ==========');
+      debugPrint('success: ${result.success}');
+      debugPrint('idempotent: ${result.idempotent}');
+      debugPrint('paymentId: ${result.paymentId}');
+      debugPrint('orderId: ${result.orderId}');
+      debugPrint('=======================================');
+
+      // إذا كانت العملية ناجحة أو سبق تنفيذها بنفس
+      // idempotency key نعتبرها ناجحة.
+      if (!result.success && !result.idempotent) {
+        debugPrint('Settlement returned unsuccessful result.');
+        debugPrint('Raw response: $response');
+
+        throw PaymentException(
+          'payment_failed',
+          'Payment settlement failed. RPC response: $response',
+        );
       }
+
+      debugPrint('SETTLE WALLET PAYMENT SUCCESS');
+
       return result;
-    } on PostgrestException catch (error) {
-      throw mapPaymentError(error);
-    } on PaymentException {
+    } on PostgrestException catch (error, stackTrace) {
+      debugPrint('');
+      debugPrint('========== SUPABASE PAYMENT ERROR ==========');
+      debugPrint('Message: ${error.message}');
+      debugPrint('Code: ${error.code}');
+      debugPrint('Details: ${error.details}');
+      debugPrint('Hint: ${error.hint}');
+      debugPrint('StackTrace: $stackTrace');
+      debugPrint('============================================');
+
+      throw PaymentException(
+        error.code ?? 'supabase_payment_error',
+        'Supabase error: ${error.message}'
+        '${error.details != null ? ' | Details: ${error.details}' : ''}'
+        '${error.hint != null ? ' | Hint: ${error.hint}' : ''}',
+      );
+    } on PaymentException catch (error, stackTrace) {
+      debugPrint('');
+      debugPrint('========== PAYMENT EXCEPTION ==========');
+      debugPrint('Error: $error');
+      debugPrint('StackTrace: $stackTrace');
+      debugPrint('=======================================');
+
       rethrow;
-    } catch (_) {
-      throw const PaymentException('payment_failed', 'Payment failed');
+    } catch (error, stackTrace) {
+      debugPrint('');
+      debugPrint('========== UNKNOWN PAYMENT ERROR ==========');
+      debugPrint('Type: ${error.runtimeType}');
+      debugPrint('Error: $error');
+      debugPrint('StackTrace: $stackTrace');
+      debugPrint('===========================================');
+
+      throw PaymentException(
+        'payment_failed',
+        'Unexpected payment error: $error',
+      );
     }
   }
 

@@ -28,18 +28,32 @@ class WalletSupabaseDatasource {
   }
 
   Future<List<WalletTransaction>> getTransactions(String userId) async {
-    final response = await _client
-        .from('wallet_transactions')
-        .select(
-          'id, wallet_user_id, counterparty_user_id, payment_id, order_id, '
-          'transaction_type, direction, amount, balance_before, balance_after, '
-          'status, transfer_group, currency, title, description, created_at, '
-          'metadata',
-        )
-        .eq('wallet_user_id', userId)
-        .order('created_at', ascending: false);
+    // final response = await _client
+    //     .from('wallet_transactions')
+    //     .select(
+    //       'id, wallet_user_id, counterparty_user_id, payment_id, order_id, '
+    //       'transaction_type, direction, amount, balance_before, balance_after, '
+    //       'status, transfer_group, currency, title, description, created_at, '
+    //       'metadata',
+    //     )
+    //     .eq('wallet_user_id', userId)
+    //     .order('created_at', ascending: false);
 
-    return _rows(response).map(WalletTransaction.fromJson).toList();
+    // return _rows(response).map(WalletTransaction.fromJson).toList();
+
+     final response = await _client
+      .from('wallet_transactions')
+      .select(
+        'id, wallet_user_id, direction, transaction_type, amount, '
+        'balance_before, balance_after, status, order_id, payment_id, '
+        'withdrawal_id, counterparty_user_id, related_transaction_id, '
+        'transfer_group, idempotency_key, title, description, metadata, '
+        'created_at, created_by, created_by_user_id, currency',
+      )
+      .eq('wallet_user_id', userId)
+      .order('created_at', ascending: false);
+
+  return _rows(response).map(WalletTransaction.fromJson).toList();
   }
 
   Future<List<WalletPaymentEvent>> getPaymentEvents({

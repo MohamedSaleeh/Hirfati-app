@@ -269,11 +269,24 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
 
   Future<void> _processPayment() async {
     if (_isProcessing || _successHandled) return;
+
     final theme = Theme.of(context);
-    setState(() => _isProcessing = true);
+
+    setState(() {
+      _isProcessing = true;
+    });
+
     _idempotencyKey ??= _newUuidV4();
 
     try {
+      debugPrint('==========================================');
+      debugPrint('PAYMENT START');
+      debugPrint('Order ID: ${widget.order.id}');
+      debugPrint('Order price: ${widget.order.price}');
+      debugPrint('Payment method: $_selectedMethod');
+      debugPrint('Idempotency key: $_idempotencyKey');
+      debugPrint('==========================================');
+
       final paymentNotifier = ref.read(paymentNotifierProvider.notifier);
 
       PaymentSettlementResult? result;
@@ -287,9 +300,18 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
         );
 
         if (cardDetails == null) {
-          setState(() => _isProcessing = false);
+          debugPrint('Card payment cancelled by user.');
+
+          if (mounted) {
+            setState(() {
+              _isProcessing = false;
+            });
+          }
+
           return;
         }
+
+        debugPrint('Calling processPayment() for card...');
 
         result = await paymentNotifier.processPayment(
           order: widget.order,
@@ -298,6 +320,8 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
           cardDetails: cardDetails,
         );
       } else {
+        debugPrint('Calling processPayment() for $_selectedMethod...');
+
         result = await paymentNotifier.processPayment(
           order: widget.order,
           paymentMethod: _selectedMethod,
@@ -305,38 +329,109 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
         );
       }
 
-      if (result != null && (result.success || result.idempotent) && mounted) {
+      debugPrint('');
+      debugPrint('========== PAYMENT RESULT ==========');
+      debugPrint('Result is null: ${result == null}');
+      debugPrint('Result: $result');
+
+      if (result != null) {
+        debugPrint('Result success: ${result.success}');
+        debugPrint('Result idempotent: ${result.idempotent}');
+        debugPrint('Result paymentId: ${result.paymentId}');
+        debugPrint('Result orderId: ${result.orderId}');
+      }
+
+      final paymentState = ref.read(paymentNotifierProvider);
+
+      debugPrint('---------- NOTIFIER STATE ----------');
+      debugPrint('State: $paymentState');
+      debugPrint('hasError: ${paymentState.hasError}');
+      debugPrint('error: ${paymentState.error}');
+      debugPrint('------------------------------------');
+
+      final isSuccessful =
+          result != null && (result.success || result.idempotent);
+
+      if (isSuccessful && mounted) {
+        debugPrint('PAYMENT SUCCESS');
+
         _successHandled = true;
+
         ref.invalidate(walletProvider);
         ref.invalidate(ordersProvider(OrderStatus.pending));
         ref.invalidate(ordersProvider(OrderStatus.completed));
+
         Navigator.pop(context);
+
         widget.onSuccess();
-      } else if (mounted) {
-        final paymentState = ref.read(paymentNotifierProvider);
-        final message = paymentState.hasError
-            ? paymentState.error.toString()
-            : 'Payment failed'.i18n;
+
+        return;
+      }
+
+      debugPrint('PAYMENT RETURNED AS FAILED');
+
+      if (mounted) {
+        String errorMessage;
+
+        if (paymentState.hasError) {
+          errorMessage = paymentState.error.toString();
+        } else if (result == null) {
+          errorMessage = 'Payment failed: processPayment returned null';
+        } else {
+          errorMessage =
+              'Payment failed: '
+              'success=${result.success}, '
+              'idempotent=${result.idempotent}, '
+              'paymentId=${result.paymentId}, '
+              'orderId=${result.orderId}';
+        }
+
+        debugPrint('Displayed error: $errorMessage');
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(message),
+            content: Text(
+              errorMessage,
+              maxLines: 8,
+              overflow: TextOverflow.ellipsis,
+            ),
+            duration: const Duration(seconds: 12),
             backgroundColor: theme.colorScheme.error,
           ),
         );
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('');
+      debugPrint('============ PAYMENT EXCEPTION ============');
+      debugPrint('Exception type: ${e.runtimeType}');
+      debugPrint('Exception: $e');
+      debugPrint('Stack trace:');
+      debugPrint(st.toString());
+      debugPrint('===========================================');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Payment failed: $e'.i18n),
+            content: Text(
+              e.toString(),
+              maxLines: 8,
+              overflow: TextOverflow.ellipsis,
+            ),
+            duration: const Duration(seconds: 12),
             backgroundColor: theme.colorScheme.error,
           ),
         );
       }
     } finally {
+      debugPrint('PAYMENT PROCESS FINISHED');
+      debugPrint('==========================================');
+
       _idempotencyKey = null;
+
       if (mounted) {
-        setState(() => _isProcessing = false);
+        setState(() {
+          _isProcessing = false;
+        });
       }
     }
   }

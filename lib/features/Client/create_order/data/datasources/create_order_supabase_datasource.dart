@@ -27,12 +27,41 @@ class CreateOrderSupabaseDatasource {
   Future<List<ServiceModel>> getWorkerServices(String workerId) async {
     final response = await _client
         .from('services')
-        .select('id, title, description, price, duration_minutes, category_id')
+        .select('''
+        id,
+        title,
+        description,
+        price,
+        duration_minutes,
+        category_id,
+        service_translations (
+          locale,
+          title,
+          description
+        )
+      ''')
         .eq('worker_id', workerId)
         .order('created_at', ascending: true);
-
+    debugPrint('SERVICES RESPONSE: $response');
     return (response as List<dynamic>).map((e) {
       final row = Map<String, dynamic>.from(e as Map);
+
+      final rawTranslations = row['service_translations'] as List? ?? const [];
+
+      final translations = rawTranslations
+          .whereType<Map>()
+          .map(
+            (item) => ServiceTranslationModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+          )
+          .toList();
+
+      debugPrint(
+        'SERVICE ${row['title']} -> '
+        '${translations.map((t) => '${t.locale}:${t.title}').toList()}',
+      );
+
       return ServiceModel(
         id: row['id'].toString(),
         title: row['title']?.toString() ?? 'Service',
@@ -40,6 +69,7 @@ class CreateOrderSupabaseDatasource {
         price: (row['price'] as num?)?.toDouble() ?? 0,
         durationMinutes: row['duration_minutes'] as int?,
         categoryId: row['category_id']?.toString(),
+        translations: translations,
       );
     }).toList();
   }

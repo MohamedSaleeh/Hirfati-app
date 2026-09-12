@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../../core/presentation/providers/language_provider.dart';
 import '../../../../../translations.dart';
 import '../../domain/models/service_model.dart';
 
-class ServiceSelector extends StatelessWidget {
+class ServiceSelector extends ConsumerWidget {
   final List<ServiceModel> services;
   final String? selectedServiceId;
   final ValueChanged<ServiceModel> onSelect;
@@ -15,9 +18,12 @@ class ServiceSelector extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    // عند تغيير اللغة يعاد بناء القائمة تلقائياً.
+    final language = ref.watch(language_provider);
 
     if (services.isEmpty) {
       return Container(
@@ -42,6 +48,11 @@ class ServiceSelector extends StatelessWidget {
     return Column(
       children: services.map((service) {
         final isSelected = selectedServiceId == service.id;
+
+        final title = resolveServiceTitle(service, language);
+
+        final description = resolveServiceDescription(service, language);
+
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: isSelected ? 2 : 0,
@@ -72,23 +83,27 @@ class ServiceSelector extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          service.title.i18n,
+                          title,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: colorScheme.onSurface,
                           ),
                         ),
-                        if (service.description != null &&
-                            service.description!.isNotEmpty)
+
+                        if (description != null && description.isNotEmpty) ...[
+                          const SizedBox(height: 2),
                           Text(
-                            service.description!,
+                            description,
                             style: TextStyle(
                               fontSize: 13,
                               color: colorScheme.onSurfaceVariant,
                             ),
                           ),
+                        ],
+
                         const SizedBox(height: 4),
+
                         Row(
                           children: [
                             Text(
@@ -98,6 +113,7 @@ class ServiceSelector extends StatelessWidget {
                                 color: colorScheme.primary,
                               ),
                             ),
+
                             if (service.durationMinutes != null) ...[
                               const SizedBox(width: 12),
                               Icon(
@@ -107,7 +123,9 @@ class ServiceSelector extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '${service.durationMinutes} min',
+                                language.startsWith('ar')
+                                    ? '${service.durationMinutes} دقيقة'
+                                    : '${service.durationMinutes} min',
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: colorScheme.onSurfaceVariant,

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ServiceModel {
 
- String get id; String get title; String? get description; double get price; int? get durationMinutes; String? get categoryId;
+ String get id; String get title; String? get description; double get price; int? get durationMinutes; String? get categoryId; List<ServiceTranslationModel> get translations;
 /// Create a copy of ServiceModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ServiceModelCopyWith<ServiceModel> get copyWith => _$ServiceModelCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ServiceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&const DeepCollectionEquality().equals(other.translations, translations));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,price,durationMinutes,categoryId);
+int get hashCode => Object.hash(runtimeType,id,title,description,price,durationMinutes,categoryId,const DeepCollectionEquality().hash(translations));
 
 @override
 String toString() {
-  return 'ServiceModel(id: $id, title: $title, description: $description, price: $price, durationMinutes: $durationMinutes, categoryId: $categoryId)';
+  return 'ServiceModel(id: $id, title: $title, description: $description, price: $price, durationMinutes: $durationMinutes, categoryId: $categoryId, translations: $translations)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ServiceModelCopyWith<$Res>  {
   factory $ServiceModelCopyWith(ServiceModel value, $Res Function(ServiceModel) _then) = _$ServiceModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String? description, double price, int? durationMinutes, String? categoryId
+ String id, String title, String? description, double price, int? durationMinutes, String? categoryId, List<ServiceTranslationModel> translations
 });
 
 
@@ -62,7 +62,7 @@ class _$ServiceModelCopyWithImpl<$Res>
 
 /// Create a copy of ServiceModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? price = null,Object? durationMinutes = freezed,Object? categoryId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? price = null,Object? durationMinutes = freezed,Object? categoryId = freezed,Object? translations = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -70,7 +70,8 @@ as String,description: freezed == description ? _self.description : description 
 as String?,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as double,durationMinutes: freezed == durationMinutes ? _self.durationMinutes : durationMinutes // ignore: cast_nullable_to_non_nullable
 as int?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,translations: null == translations ? _self.translations : translations // ignore: cast_nullable_to_non_nullable
+as List<ServiceTranslationModel>,
   ));
 }
 
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String? description,  double price,  int? durationMinutes,  String? categoryId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String? description,  double price,  int? durationMinutes,  String? categoryId,  List<ServiceTranslationModel> translations)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ServiceModel() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.price,_that.durationMinutes,_that.categoryId);case _:
+return $default(_that.id,_that.title,_that.description,_that.price,_that.durationMinutes,_that.categoryId,_that.translations);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.id,_that.title,_that.description,_that.price,_that.duratio
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String? description,  double price,  int? durationMinutes,  String? categoryId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String? description,  double price,  int? durationMinutes,  String? categoryId,  List<ServiceTranslationModel> translations)  $default,) {final _that = this;
 switch (_that) {
 case _ServiceModel():
-return $default(_that.id,_that.title,_that.description,_that.price,_that.durationMinutes,_that.categoryId);case _:
+return $default(_that.id,_that.title,_that.description,_that.price,_that.durationMinutes,_that.categoryId,_that.translations);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.id,_that.title,_that.description,_that.price,_that.duratio
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String? description,  double price,  int? durationMinutes,  String? categoryId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String? description,  double price,  int? durationMinutes,  String? categoryId,  List<ServiceTranslationModel> translations)?  $default,) {final _that = this;
 switch (_that) {
 case _ServiceModel() when $default != null:
-return $default(_that.id,_that.title,_that.description,_that.price,_that.durationMinutes,_that.categoryId);case _:
+return $default(_that.id,_that.title,_that.description,_that.price,_that.durationMinutes,_that.categoryId,_that.translations);case _:
   return null;
 
 }
@@ -211,7 +212,7 @@ return $default(_that.id,_that.title,_that.description,_that.price,_that.duratio
 
 
 class _ServiceModel implements ServiceModel {
-  const _ServiceModel({required this.id, required this.title, this.description, required this.price, this.durationMinutes, this.categoryId});
+  const _ServiceModel({required this.id, required this.title, this.description, required this.price, this.durationMinutes, this.categoryId, final  List<ServiceTranslationModel> translations = const <ServiceTranslationModel>[]}): _translations = translations;
   
 
 @override final  String id;
@@ -220,6 +221,13 @@ class _ServiceModel implements ServiceModel {
 @override final  double price;
 @override final  int? durationMinutes;
 @override final  String? categoryId;
+ final  List<ServiceTranslationModel> _translations;
+@override@JsonKey() List<ServiceTranslationModel> get translations {
+  if (_translations is EqualUnmodifiableListView) return _translations;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_translations);
+}
+
 
 /// Create a copy of ServiceModel
 /// with the given fields replaced by the non-null parameter values.
@@ -231,16 +239,16 @@ _$ServiceModelCopyWith<_ServiceModel> get copyWith => __$ServiceModelCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ServiceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&const DeepCollectionEquality().equals(other._translations, _translations));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,title,description,price,durationMinutes,categoryId);
+int get hashCode => Object.hash(runtimeType,id,title,description,price,durationMinutes,categoryId,const DeepCollectionEquality().hash(_translations));
 
 @override
 String toString() {
-  return 'ServiceModel(id: $id, title: $title, description: $description, price: $price, durationMinutes: $durationMinutes, categoryId: $categoryId)';
+  return 'ServiceModel(id: $id, title: $title, description: $description, price: $price, durationMinutes: $durationMinutes, categoryId: $categoryId, translations: $translations)';
 }
 
 
@@ -251,7 +259,7 @@ abstract mixin class _$ServiceModelCopyWith<$Res> implements $ServiceModelCopyWi
   factory _$ServiceModelCopyWith(_ServiceModel value, $Res Function(_ServiceModel) _then) = __$ServiceModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String? description, double price, int? durationMinutes, String? categoryId
+ String id, String title, String? description, double price, int? durationMinutes, String? categoryId, List<ServiceTranslationModel> translations
 });
 
 
@@ -268,7 +276,7 @@ class __$ServiceModelCopyWithImpl<$Res>
 
 /// Create a copy of ServiceModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? price = null,Object? durationMinutes = freezed,Object? categoryId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? description = freezed,Object? price = null,Object? durationMinutes = freezed,Object? categoryId = freezed,Object? translations = null,}) {
   return _then(_ServiceModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -276,7 +284,8 @@ as String,description: freezed == description ? _self.description : description 
 as String?,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as double,durationMinutes: freezed == durationMinutes ? _self.durationMinutes : durationMinutes // ignore: cast_nullable_to_non_nullable
 as int?,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,translations: null == translations ? _self._translations : translations // ignore: cast_nullable_to_non_nullable
+as List<ServiceTranslationModel>,
   ));
 }
 

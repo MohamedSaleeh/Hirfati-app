@@ -100,13 +100,49 @@ class WorkGallerySupabaseDatasource {
     required String category,
     required String complexity,
   }) async {
+    final uploadedImageUrls = <String>[];
+
+    for (int index = 0; index < imageUrls.length; index++) {
+      final source = imageUrls[index].trim();
+
+      if (source.isEmpty) {
+        continue;
+      }
+
+      final uri = Uri.tryParse(source);
+
+      final isAlreadyRemote =
+          uri != null &&
+          (uri.scheme == 'http' || uri.scheme == 'https') &&
+          uri.host.isNotEmpty;
+
+      if (isAlreadyRemote) {
+        // الصورة مرفوعة مسبقاً
+        uploadedImageUrls.add(source);
+      } else {
+        // هذا مسار محلي من الهاتف، ارفعه إلى Supabase Storage
+        final uploadedUrl = await uploadWorkImage(workerId, source, index);
+
+        uploadedImageUrls.add(uploadedUrl);
+      }
+    }
+
+    if (uploadedImageUrls.isEmpty) {
+      throw Exception('No images were uploaded');
+    }
+
+    debugPrint('========== WORK IMAGE UPLOAD ==========');
+    debugPrint('Worker ID: $workerId');
+    debugPrint('Uploaded URLs: $uploadedImageUrls');
+    debugPrint('=======================================');
+
     final response = await _client
         .from('work_portfolio')
         .insert({
           'worker_id': workerId,
           'title': title,
           'description': description,
-          'image_url': imageUrls,
+          'image_url': uploadedImageUrls,
           'category': category,
           'complexity': complexity,
           'views': 0,

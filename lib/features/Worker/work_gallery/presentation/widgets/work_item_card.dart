@@ -13,6 +13,68 @@ class WorkItemCard extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
   });
+  
+  Widget _buildWorkImage() {
+  const height = 180.0;
+
+  if (item.imageUrls.isEmpty) {
+    return _buildImagePlaceholder();
+  }
+
+  final imageUrl = item.imageUrls.first.trim();
+
+  if (imageUrl.isEmpty) {
+    return _buildImagePlaceholder();
+  }
+
+  final uri = Uri.tryParse(imageUrl);
+
+  final isValidNetworkUrl =
+      uri != null &&
+      (uri.scheme == 'http' || uri.scheme == 'https') &&
+      uri.host.isNotEmpty;
+
+  if (!isValidNetworkUrl) {
+    debugPrint(
+      'Invalid portfolio image URL: $imageUrl',
+    );
+
+    return _buildImagePlaceholder();
+  }
+
+  return Image.network(
+    imageUrl,
+    height: height,
+    width: double.infinity,
+    fit: BoxFit.cover,
+    errorBuilder: (
+      BuildContext context,
+      Object error,
+      StackTrace? stackTrace,
+    ) {
+      debugPrint(
+        'Failed to load portfolio image: $imageUrl',
+      );
+      debugPrint('Error: $error');
+
+      return _buildImagePlaceholder();
+    },
+  );
+}
+
+Widget _buildImagePlaceholder() {
+  return Container(
+    height: 180,
+    width: double.infinity,
+    color: Colors.grey.shade200,
+    alignment: Alignment.center,
+    child: const Icon(
+      Icons.broken_image_outlined,
+      size: 48,
+      color: Colors.grey,
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -39,21 +101,12 @@ class WorkItemCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: item.imageUrls.isNotEmpty
-                ? Image.network(
-                    item.imageUrls.first,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  )
-                : Container(
-                    height: 180,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.image, size: 48, color: Colors.grey),
-                  ),
-          ),
+        ClipRRect(
+  borderRadius: const BorderRadius.vertical(
+    top: Radius.circular(20),
+  ),
+  child: _buildWorkImage(),
+),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
